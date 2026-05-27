@@ -1,0 +1,253 @@
+/*
+Theme Name: Hotel Cosmopolitan Child
+Theme URI: https://www.hotelcosmopolitan.in/
+Description: Divi child theme for Hotel Cosmopolitan, Ahmedabad. Replicates the look and feel of the original static site with Divi as the framework.
+Author: Wappnet Systems
+Author URI: https://wappnet.com/
+Template: Divi
+Version: 1.0.0
+Text Domain: hotelcosmopolitan-child
+*/
+
+/* ============================================================
+   DESIGN TOKENS — pulled from original public_html/css/general.css
+   ============================================================ */
+:root {
+    --hc-white: #ffffff;
+    --hc-red: #D81418;
+    --hc-red-hover: #bd1215;
+    --hc-orange: #E88800;
+    --hc-orange-hover: #d47d03;
+    --hc-title: #14141e;
+    --hc-body: #777777;
+    --hc-body-2: #8a8a8a;
+    --hc-font: 'Poppins', sans-serif;
+}
+
+/* ============================================================
+   TYPOGRAPHY OVERRIDES
+   ============================================================ */
+body,
+body .et_pb_module,
+body p,
+body .et_pb_text_inner {
+    font-family: var(--hc-font);
+    color: var(--hc-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.et_pb_module h1, .et_pb_module h2, .et_pb_module h3,
+.et_pb_module h4, .et_pb_module h5, .et_pb_module h6 {
+    font-family: var(--hc-font);
+    color: var(--hc-title);
+    font-weight: 600;
+}
+
+a { color: var(--hc-red); }
+a:hover { color: var(--hc-red-hover); }
+
+/* ============================================================
+   BUTTONS — primary red, mirrors .btn-danger from original site
+   ============================================================ */
+.et_pb_button,
+.hc-btn-primary,
+input[type="submit"].hc-btn-primary {
+    background-color: var(--hc-red) !important;
+    border: 2px solid var(--hc-red) !important;
+    color: #fff !important;
+    padding: 12px 28px !important;
+    font-family: var(--hc-font) !important;
+    font-weight: 500 !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 0;
+    transition: all .3s ease;
+}
+
+.et_pb_button:hover,
+.hc-btn-primary:hover {
+    background-color: var(--hc-red-hover) !important;
+    border-color: var(--hc-red-hover) !important;
+    color: #fff !important;
+}
+
+.et_pb_button:after { display: none !important; }
+
+/* ============================================================
+   HEADER — mirrors header_v2 sticky pattern from component/header.php
+   ============================================================ */
+#main-header {
+    background-color: rgba(20, 20, 30, 0.85);
+    box-shadow: none;
+    transition: all .3s ease;
+}
+#main-header.et-fixed-header {
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+#top-menu li a {
+    color: #fff;
+    font-family: var(--hc-font);
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: .5px;
+    transition: color .3s ease;
+}
+#main-header.et-fixed-header #top-menu li a { color: var(--hc-title); }
+#top-menu li.current-menu-item > a,
+#top-menu li a:hover { color: var(--hc-red); }
+
+.hc-book-now-btn {
+    background-color: var(--hc-red);
+    color: #fff !important;
+    padding: 10px 22px;
+    border-radius: 2px;
+    margin-left: 16px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+.hc-book-now-btn:hover { background-color: var(--hc-red-hover); }
+
+/* ============================================================
+   PAGE TITLE — mirrors .page-title block from original
+   ============================================================ */
+.hc-page-title {
+    background: linear-gradient(rgba(20,20,30,.55), rgba(20,20,30,.55)), url('assets/images/page-title/default.jpg') center/cover no-repeat;
+    padding: 180px 0 80px;
+    color: #fff;
+    text-align: center;
+}
+.hc-page-title h1 {
+    color: #fff;
+    font-size: 42px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+.hc-breadcrumbs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    gap: 8px;
+    font-size: 14px;
+}
+.hc-breadcrumbs li a { color: rgba(255,255,255,.85); }
+.hc-breadcrumbs li.active { color: var(--hc-red); }
+.hc-breadcrumbs li .separator::before { content: "/"; color: rgba(255,255,255,.5); margin: 0 6px; }
+
+/* ============================================================
+   ROOMS — single & archive
+   ============================================================ */
+.hc-room-card {
+    background: #fff;
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+    transition: box-shadow .3s ease;
+}
+.hc-room-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+
+.hc-room-card__image img { width: 100%; height: auto; display: block; }
+.hc-room-card__body { padding: 22px 24px; }
+.hc-room-card__title {
+    font-size: 22px;
+    margin: 0 0 8px;
+    color: var(--hc-title);
+}
+.hc-room-card__title a { color: inherit; }
+.hc-room-card__title a:hover { color: var(--hc-red); }
+
+.hc-room-amenities {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 14px;
+}
+.hc-room-amenities li {
+    color: var(--hc-body);
+    padding-left: 22px;
+    position: relative;
+}
+.hc-room-amenities li::before {
+    content: "\2713";
+    color: var(--hc-red);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.hc-room-options p {
+    margin: 0 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Single room gallery */
+.hc-room-gallery img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+}
+
+/* ============================================================
+   INQUIRY / BOOKING FORM
+   ============================================================ */
+.hc-form { margin: 0; }
+.hc-form .hc-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.hc-form .hc-form-row--single { grid-template-columns: 1fr; }
+.hc-form input,
+.hc-form select,
+.hc-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-family: var(--hc-font);
+    font-size: 14px;
+    color: var(--hc-title);
+    border-radius: 2px;
+}
+.hc-form input:focus,
+.hc-form select:focus,
+.hc-form textarea:focus {
+    outline: none;
+    border-color: var(--hc-red);
+}
+.hc-form-status {
+    margin-top: 12px;
+    padding: 10px 14px;
+    display: none;
+}
+.hc-form-status.is-success { display: block; background: #e8f5e9; color: #2e7d32; }
+.hc-form-status.is-error { display: block; background: #ffebee; color: #c62828; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+#main-footer { background: #14141e; color: #aaa; }
+#main-footer a { color: #ccc; }
+#main-footer a:hover { color: var(--hc-red); }
+#footer-bottom { background: #0d0d14; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .hc-page-title { padding: 140px 0 60px; }
+    .hc-page-title h1 { font-size: 30px; }
+    .hc-room-amenities { grid-template-columns: 1fr; }
+    .hc-form .hc-form-row { grid-template-columns: 1fr; }
+}
