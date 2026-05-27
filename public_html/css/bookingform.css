@@ -1,0 +1,2258 @@
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--body-font-family-1) !important;
+}
+
+code {
+    font-family: var(--body-font-family-1) !important;
+}
+
+
+#quickbook-widget .MbsSearchWidget .formGroup {
+    margin-bottom: 15px !important;
+}
+
+#quickbook-widget .MbsSearchWidget {
+    display: block !important;
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup+.formGroup .inputbody {
+    font-family: system-ui;
+    margin: 0
+}
+
+div#quickbook-widget .MbsSearchWidget .mediator {
+    min-width: 60px
+}
+
+div#quickbook-widget .MbsSearchWidget .mbs-arrow {
+    color: #000;
+    font-size: 22px;
+    position: absolute;
+    right: 55%;
+    top: 22px
+}
+
+div#quickbook-widget .MbsSearchWidget .lbl {
+    color: #000;
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-transform: capitalize
+}
+
+div#quickbook-widget .MbsSearchWidget .lbl.mb-0 {
+    margin-bottom: 0;
+    margin-left: 6px
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate {
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: 3px;
+    color: #000;
+    display: flex;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 7px 10px
+}
+
+div#quickbook-widget .MbsSearchWidget .checkoutDate {
+    padding-left: 0
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate::-webkit-input-placeholder {
+    font-size: 14px
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate::placeholder {
+    font-size: 14px
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate:focus {
+    outline: none
+}
+
+div#quickbook-widget .MbsSearchWidget .searchinOut {
+    display: flex;
+    position: relative;
+    width: 100%;
+    justify-content: space-between;
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input {
+    cursor: pointer;
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input .endDate {
+    border-left: none !important;
+    border-radius: 0 3px 3px 0;
+    border-right: 1px solid #963120;
+    display: flex !important;
+    justify-content: flex-end;
+    min-width: auto;
+    height: 60px;
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input.checkout {
+    text-align: right
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate.startDate {
+    border-radius: 3px 0 0 3px;
+    border-right: none !important;
+    min-width: 180px;
+    height: 60px;
+}
+
+#quickbook-widget div#quickbook-widget .MbsSearchWidget .formGroup .input .checkinDate.startDate {
+    border-right: none !important
+}
+
+#quickbook-widget div#quickbook-widget .MbsSearchWidget .formGroup .input .checkinDate.endDate {
+    border-left: 0 !important
+}
+
+#quickbook-widget .searchinOut.formGroup {
+    margin-right: 15px
+}
+
+div#quickbook-widget .App div#quickbook-widget .MbsSearchWidget {
+    justify-content: center
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom .d-flex {
+    display: flex;
+    margin-right: 0 !important;
+    position: relative
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom .d-flex input {
+    background-color: initial;
+    border: none;
+    line-height: 18px;
+    min-width: 240px;
+    padding: 1px 0;
+    position: relative;
+    top: 1px
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom .d-flex span {
+    color: #006060;
+    font-size: 26px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+div#quickbook-widget .MbsSearchWidget .flexibleDate input[type=checkbox] {
+    cursor: pointer;
+    display: none
+}
+
+div#quickbook-widget .MbsSearchWidget .flexibleDate .checklbl {
+    cursor: pointer;
+    position: relative
+}
+
+div#quickbook-widget .MbsSearchWidget .flexibleDate {
+    align-items: center;
+    display: flex;
+    margin-top: 8px
+}
+
+div#quickbook-widget .MbsSearchWidget .flexibleDate .checklbl:before {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid #963120;
+    border-radius: 3px;
+    content: "";
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 2px;
+    padding: 8px;
+    position: relative;
+    vertical-align: middle
+}
+
+div#quickbook-widget .MbsSearchWidget .flexibleDate input:checked+.checklbl:after {
+    border: solid #963120;
+    border-width: 0 1px 1px 0;
+    content: "";
+    display: block;
+    height: 10px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%) rotate(45deg);
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 3px
+}
+
+#quickbook-widget .MbsSearchWidget .searchBtn {
+    background-color: #D81418 !important;
+    background: #D81418 !important;
+    color: #fff !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 48px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    border: 0 !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    min-width: 0 !important;
+    cursor: pointer !important;
+}
+
+div#quickbook-widget .MbsSearchWidget .addRoom {
+    background-color: initial;
+    cursor: auto;
+    height: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 9
+}
+
+div#quickbook-widget .MbsSearchWidget .addRoomBtn {
+    align-items: center;
+    background: #006060 !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+    display: flex;
+    font-size: 12px;
+    font-weight: 500;
+    justify-content: space-between;
+    left: 0;
+    line-height: normal;
+    padding: 5px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2
+}
+
+div#quickbook-widget .MbsSearchWidget .addRoomBtn span {
+    display: inline-block
+}
+
+div#quickbook-widget .MbsSearchWidget .pointer span {
+    border: none;
+    border-radius: 3px;
+    color: #484747;
+    display: inline-block;
+    font-size: 22px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none;
+    width: 20px
+}
+
+div#quickbook-widget .MbsSearchWidget .pointer {
+    background-color: initial;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    font-size: 12px;
+    z-index: 4
+}
+
+div#quickbook-widget .MbsSearchWidget .pointer span {
+    background-color: #fff
+}
+
+div#quickbook-widget .MbsSearchWidget .pointer span+span {
+    margin-left: 2px
+}
+
+div#quickbook-widget .MbsSearchWidget .selectrow {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px
+}
+
+div#quickbook-widget .MbsSearchWidget .inc-div .incr-btn {
+    background: #fff;
+    border: 1px solid #efefef;
+    color: #565656;
+    cursor: pointer;
+    float: left;
+    font-size: 14px;
+    padding: 4px 0;
+    width: 33%
+}
+
+div#quickbook-widget .MbsSearchWidget .inc-div .incr-btn[data-action=increase] {
+    border: 0;
+    border-left: 1px solid #ddd;
+    float: right
+}
+
+div#quickbook-widget .MbsSearchWidget .inc-div .incr-btn[data-action=decrease] {
+    border: 0;
+    border-right: 1px solid #ddd
+}
+
+div#quickbook-widget .MbsSearchWidget .selectrow label {
+    color: #212529;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: normal;
+    margin: 0 4px 3px 0;
+    vertical-align: middle
+}
+
+div#quickbook-widget .MbsSearchWidget .selectrow .inc-div {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    display: flex;
+    float: none;
+    margin-top: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 100%
+}
+
+div#quickbook-widget .MbsSearchWidget .selectrow .quantity {
+    background: hsla(0, 0%, 100%, .85);
+    border: 1px solid #fff;
+    color: #000;
+    font-size: 14px;
+    line-height: 21px;
+    text-align: center;
+    width: 33%
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom .d-flex input:focus,
+div#quickbook-widget .MbsSearchWidget .selectrow .quantity:focus {
+    outline: none
+}
+
+div#quickbook-widget .MbsSearchWidget .selectrow>* {
+    flex: 1 1
+}
+
+div#quickbook-widget .MbsSearchWidget .roomBlock {
+    display: inline-block;
+    height: 90px;
+    width: 100%
+}
+
+div#quickbook-widget .MbsSearchWidget .inputGroup {
+    display: flex
+}
+
+div#quickbook-widget div#quickbook-widget .MbsSearchWidget .lbl {
+    text-transform: uppercase
+}
+
+.guest-count-input {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    cursor: pointer;
+    display: inline-flex;
+    line-height: 0;
+    overflow: visible;
+    padding: 26px 10px 10px;
+    position: absolute;
+    vertical-align: top;
+    z-index: 9
+}
+
+.searchBlock {
+    align-items: center;
+    align-self: center;
+    display: flex;
+    position: relative;
+    top: 10px
+}
+
+div#quickbook-widget .MbsSearchWidget {
+    align-items: center;
+    background: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: auto;
+    max-width: 1090px;
+    padding: 20px;
+    width: 100%
+}
+
+div#quickbook-widget .MbsSearchWidget .prop-lists {
+    margin-right: 15px;
+    max-width: 260px;
+    width: 100%
+}
+
+div#quickbook-widget .MbsSearchWidget .formGroup+.formGroup .input .checkinDate.endDate {
+    padding-left: 0
+}
+
+.beWidgetFrame {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%
+}
+
+.video-popup {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    bottom: auto;
+    display: none;
+    height: calc(100vh - 17px);
+    left: 0;
+    margin: auto;
+    overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 10px;
+    width: 99%;
+    z-index: 99999
+}
+
+.video-popup #close-frm.mbs-close {
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 23px;
+    font-weight: 900;
+    height: 18px;
+    padding: 1px 2px;
+    right: 0;
+    text-align: center;
+    top: 0;
+    width: 18px
+}
+
+.mbs-close,
+.video-popup #close-frm.mbs-close {
+    color: #fff;
+    line-height: 15px;
+    position: absolute
+}
+
+.mbs-close {
+    background: #323b32 !important;
+    border-radius: 2px;
+    color: #000;
+    filter: alpha(opacity=20);
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 1;
+    right: -11px;
+    text-shadow: none;
+    text-shadow: 0 1px 0 #fff;
+    top: -11px;
+    z-index: 9
+}
+
+div#quickbook-widget div#quickbook-widget .MbsSearchWidget .searchBtn {
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: inherit;
+    height: 32px;
+    line-height: 0;
+    margin: 0;
+    touch-action: inherit;
+    -webkit-user-select: none;
+    user-select: inherit;
+    vertical-align: middle;
+    white-space: inherit
+}
+
+#quickbook-widget .searchinOut.formGroup {
+    font-size: inherit;
+    line-height: inherit
+}
+
+#quickbook-widget .searchinOut.formGroup .mbs-arrow {
+    align-items: center;
+    bottom: 20px !important;
+    display: flex;
+    height: 15px;
+    justify-content: center;
+    left: 0;
+    margin: auto;
+    right: 0;
+    top: auto;
+    width: 10px;
+}
+
+#quickbook-widget .MbsSearchWidget .prop-lists select {
+    width: 100%
+}
+
+.rate-position {
+    bottom: 7px;
+    position: relative
+}
+
+:root {
+    --loader-background-color: #eee;
+    --loader-highlight-color: #dedede
+}
+
+.skelton {
+    align-items: end;
+    background-color: #fff;
+    border-radius: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin: auto;
+    max-width: 1090px;
+    padding: 20px;
+    text-align: center;
+    width: 100%
+}
+
+.skeleton-loader {
+    -webkit-animation: loading 2s ease-in-out infinite;
+    animation: loading 2s ease-in-out infinite;
+    background: linear-gradient(90deg, #eee 25%, #dedede 50%, #eee 75%);
+    background: linear-gradient(90deg, var(--loader-background-color) 25%, var(--loader-highlight-color) 50%, var(--loader-background-color) 75%);
+    background-size: 200% 100%;
+    border-radius: 3px;
+    height: 34px;
+    width: 340px
+}
+
+.skeleton-loader-second {
+    width: 207px
+}
+
+.skeleton-loader-third {
+    width: 102px
+}
+
+.skeleton-loader-text {
+    -webkit-animation: loading 2s ease-in-out infinite;
+    animation: loading 2s ease-in-out infinite;
+    background: linear-gradient(90deg, #eee 25%, #dedede 50%, #eee 75%);
+    background: linear-gradient(90deg, var(--loader-background-color) 25%, var(--loader-highlight-color) 50%, var(--loader-background-color) 75%);
+    background-size: 200% 100%;
+    border-radius: 3px;
+    height: 10px;
+    margin-bottom: 10px;
+    width: 100px
+}
+
+@-webkit-keyframes loading {
+    0% {
+        background-position: 200% 0
+    }
+
+    to {
+        background-position: -200% 0
+    }
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0
+    }
+
+    to {
+        background-position: -200% 0
+    }
+}
+
+.rdrNextPrevButton {
+    margin: 0 !important
+}
+
+.rdrMonthAndYearWrapper {
+    padding-top: 0 !important
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+    margin-right: 0 !important;
+    width: 100%;
+    height: 60px !important;
+}
+
+div#quickbook-widget .MbsSearchWidget .checkinDate optgroup {
+    background-color: #fff !important;
+    color: #000 !important
+}
+
+
+.rdrDateRangePickerWrapper {
+    position: absolute;
+    z-index: 1
+}
+
+.modal-body .rdrDateRangePickerWrapper {
+    position: inherit
+}
+
+.rdrEndEdge,
+.rdrInRange,
+.rdrSelected,
+.rdrStartEdge {
+    background-color: rgba(17, 179, 241, .23);
+    border-radius: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    right: 0 !important;
+    top: 0 !important
+}
+
+.rdrDayActive .rdrEndEdge.rdrStartEdge,
+.rdrEndEdge,
+.rdrEndEdge.rdrStartEdge {
+    background-color: rgba(17, 179, 241, .23)
+}
+
+.rdrInRange {
+    background-color: rgba(17, 179, 241, .23) !important
+}
+
+.rdrDayEndPreview,
+.rdrDayInPreview,
+.rdrDayStartPreview {
+    border: 0 !important
+}
+
+.rdrDayEndPreview,
+.rdrDayInPreview {
+    background-color: rgba(17, 179, 241, .23);
+    border-radius: 0 !important;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    right: 0;
+    top: 0
+}
+
+.rdrDayStartOfMonth .rdrEndEdge,
+.rdrDayStartOfMonth .rdrInRange,
+.rdrDayStartOfWeek .rdrEndEdge,
+.rdrDayStartOfWeek .rdrInRange {
+    left: 0
+}
+
+.rdrDayEndOfMonth .rdrInRange,
+.rdrDayEndOfMonth .rdrStartEdge,
+.rdrDayEndOfWeek .rdrInRange,
+.rdrDayEndOfWeek .rdrStartEdge {
+    right: 0
+}
+
+.selected-dates {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: 0 solid #ccc;
+    display: none;
+    margin: 0 0 0 7.5px;
+    min-width: 722px;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    top: 452px;
+    width: auto
+}
+
+.dpicker-minimumstay {
+    border-color: transparent #007bff transparent transparent;
+    border-style: solid;
+    border-width: 0 25px 25px 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 10px
+}
+
+.minimum-stay-number {
+    color: #fff !important;
+    font-size: 9px !important;
+    left: 50%;
+    position: inherit;
+    text-align: center;
+    top: 50%;
+    -webkit-transform: translate(20px, -12px);
+    transform: translate(20px, -12px)
+}
+
+.rdrDayToday .rdrDayNumber span:after {
+    content: normal !important
+}
+
+.rdrDay:hover .dpicker-minimumstay-hover {
+    display: block
+}
+
+.dpicker-minimumstay-hover {
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, .1);
+    left: 0;
+    margin: 10px 0;
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+    z-index: 111
+}
+
+.dpicker-minimumstay-hover span {
+    font-weight: 500 !important
+}
+
+.rdrDay:nth-child(7n) .rdrDayNumber .room-rate .dpicker-minimumstay .dpicker-minimumstay-hover {
+    left: -52px
+}
+
+.dpicker-minimumstay-hover {
+    display: none
+}
+
+.rdrMonth .rdrMonthName {
+    background: #000 !important
+}
+
+.rdrPprevButton i {
+    border-color: transparent #000 transparent transparent
+}
+
+.rdrNextPrevButton {
+    background: #fff !important
+}
+
+.rdrDateRangePickerWrapper {
+    padding: 0
+}
+
+@media (max-width: 1366px) {
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0;
+        -webkit-transform: translate(-40%);
+        transform: translate(-40%)
+    }
+}
+
+@media (max-width: 991px) {
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0;
+        -webkit-transform: translate(-36%);
+        transform: translate(-36%)
+    }
+}
+
+@media (max-width: 905px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 315px !important
+    }
+}
+
+@media (max-width: 768px) {
+    #quickbook-widget .MbsSearchWidget .formGroup {
+        margin-bottom: 0 !important;
+    }
+
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0;
+        -webkit-transform: translateX(-47%);
+        transform: translateX(-47%)
+    }
+
+    .dpicker-minimumstay-hover span {
+        line-height: 14px !important;
+        margin: 2px 0;
+        min-width: 60px;
+        white-space: normal
+    }
+
+    .rdrMonths.rdrMonthsHorizontal {
+        width: 675px !important
+    }
+
+    .searchBlock {
+        align-self: center
+    }
+}
+
+@media screen and (max-width: 891px) {
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0;
+        -webkit-transform: translate(-45%);
+        transform: translate(-45%)
+    }
+}
+
+@media screen and (max-width: 859px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        max-width: 590px;
+        width: 590px !important
+    }
+}
+
+@media (max-width: 768px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        width: 638px !important
+    }
+}
+
+@media (max-width: 767px) {
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0;
+        -webkit-transform: translateX(0) !important;
+        transform: translateX(0) !important
+    }
+}
+
+@media (max-width: 670px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        max-width: 550px !important
+    }
+}
+
+@media (max-width: 641px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        width: 540px !important
+    }
+}
+
+@media (max-width: 600px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        width: 500px !important
+    }
+}
+
+@media (max-width: 575px) {
+    .rdrMonths.rdrMonthsHorizontal {
+        width: auto !important
+    }
+
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 410px !important
+    }
+
+    .selected-dates {
+        min-width: 362px;
+        top: 449px
+    }
+
+    .dpicker-minimumstay-hover {
+        left: -20px
+    }
+
+    .be-widgetWrap .beWidget {
+        flex-wrap: wrap
+    }
+
+    .checkIn-OutWrapper {
+        margin-bottom: 10px;
+        width: 100%
+    }
+
+    .beWidget .form-group.promocodeTxt {
+        padding-left: 0;
+        width: 70%
+    }
+
+    .be-widgetWrap .beWidget .promocodeTxt .PromoInput {
+        max-width: 100% !important;
+        width: 100% !important
+    }
+
+    .beWidget .form-group.checkAvailBtn {
+        width: 30% !important
+    }
+
+    .checkAvailBtn .ApplyBtnCustom {
+        width: 100%
+    }
+}
+
+@media (max-width: 540px) {
+    .findAvailDates {
+        left: auto !important;
+        right: 0 !important;
+        -webkit-transform: translate(0) !important;
+        transform: translate(0) !important
+    }
+}
+
+@media (max-width: 480px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 350px !important
+    }
+}
+
+@media (max-width: 425px) {
+    .rdrDayNumber>div>span {
+        margin-top: 3px !important
+    }
+
+    button.rdrDay {
+        height: 44px !important
+    }
+
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        min-width: 300px;
+        width: auto !important
+    }
+}
+
+@media (max-width: 400px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 285px !important
+    }
+
+    .searchBlock {
+        margin-top: 0
+    }
+
+    .formGroup {
+        margin-bottom: 0 !important
+    }
+
+    .selected-dates {
+        font-size: 14px;
+        min-width: 332px
+    }
+
+    .beWidget .form-group.promocodeTxt {
+        font-size: 14px !important;
+        width: 50%
+    }
+
+    .beWidget .form-group.checkAvailBtn {
+        width: 50% !important
+    }
+
+    .wdgtWrapp .be-widgetWrap .beWidget input,
+    .wdgtWrapp .be-widgetWrap .beWidget input.date-input {
+        font-size: 16px !important
+    }
+}
+
+@media (max-width: 380px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        min-width: 264px;
+        width: 255px !important
+    }
+
+    button.rdrDay {
+        height: 40px !important
+    }
+
+    .rdrDayNumber>div>span {
+        margin-top: 0 !important
+    }
+}
+
+@media (max-width: 370px) {
+    .beWidget .form-group.checkAvailBtn {
+        padding-top: 22px !important
+    }
+}
+
+@media (max-width: 360px) {
+    .selected-dates {
+        min-width: 300px;
+        padding: 10px 8px
+    }
+}
+
+@media (max-width: 340px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 238px !important
+    }
+}
+
+@media (max-width: 330px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 270px !important
+    }
+}
+
+@media (max-width: 320px) {
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 260px !important
+    }
+}
+
+.rdrMonths.rdrMonthsVertical .rdrMonth:first-child .rdrMonthName {
+    display: block !important
+}
+
+.rdrDay .rdrStartEdge {
+    background: linear-gradient(to bottom right, transparent 50%, #c8edfc 0)
+}
+
+.rdrDay .rdrStartEdge.rdrEndEdge {
+    background: linear-gradient(to bottom right, transparent 50%, #c8edfc 0) !important
+}
+
+.rdrDay .rdrEndEdge {
+    background: linear-gradient(to top left, transparent 50%, #c8edfc 0) !important
+}
+
+.date-input.startDate {
+    border-radius: 3px 0 0 3px
+}
+
+.date-input {
+    border: 1px solid #000;
+    font-size: 16px !important;
+    min-width: 215px
+}
+
+@media (max-width: 767px) {
+    .date-input {
+        min-width: 0;
+        min-width: auto
+    }
+
+    .rdrCalendarWrapper .rdrMonthAndYearWrapper {
+        width: 96% !important
+    }
+}
+
+.modalCalender {
+    text-align: center
+}
+
+.modalCalender .rdrCalendarWrapper.rdrDateRangeWrapper {
+    position: relative;
+    margin-top: 85px !important;
+}
+
+.modalDpickerWrap {
+    align-items: center;
+    display: flex;
+    justify-content: center
+}
+
+.modalDpickerWrap .icon-cal {
+    right: 0;
+    top: 7px
+}
+
+.date-input.startDate.form-control {
+    text-align-last: left
+}
+
+.modalCalender .rdrCalendarWrapper {
+    width: 100%
+}
+
+form.checkInOutForm {
+    position: relative
+}
+
+@media (max-width: 767px) {
+    .modalCalender .checkIn-OutWrapper {
+        width: 100% !important
+    }
+
+    .modalCalender .checkIn-OutWrapper .container {
+        max-width: 100% !important
+    }
+}
+
+@media (max-width: 575px) {
+    .rdrCalendarWrapper .rdrMonthAndYearWrapper {
+        width: 92% !important
+    }
+}
+
+@media (max-width: 432px) {
+    .checkIn-OutWrapper .form-group.checkOut {
+        padding-left: 0 !important;
+        text-align: right
+    }
+
+    .checkIn-OutWrapper .form-group.checkOut label.widgetLabelchkout {
+        padding-left: 0 !important;
+        padding-right: 50px
+    }
+
+    .iconText div#end-Date-Input {
+        padding-right: 20px;
+        text-align: right
+    }
+
+    .beWidget .icon-cal {
+        right: 43%;
+        -webkit-transform: translate(-43%);
+        transform: translate(-43%)
+    }
+}
+
+@media (max-width: 1024px) {
+    .checkIn-OutWrapper .form-group.checkOut {
+        padding-left: 0 !important;
+        text-align: right
+    }
+
+    .checkIn-OutWrapper .form-group.checkOut label.widgetLabelchkout {
+        padding-left: 0 !important
+    }
+
+    .iconText div#end-Date-Input {
+        padding-right: 20px;
+        text-align: right
+    }
+
+    .beWidget .icon-cal {
+        right: 43%;
+        -webkit-transform: translate(-43%);
+        transform: translate(-43%)
+    }
+}
+
+.checkIn-OutWrapper .form-group.checkOut {
+    padding-left: 0 !important;
+    text-align: right
+}
+
+.checkIn-OutWrapper .form-group.checkOut label.widgetLabelchkout {
+    padding-left: 0 !important
+}
+
+.iconText div#end-Date-Input {
+    padding-right: 20px;
+    text-align: right
+}
+
+.beWidget .icon-cal {
+    right: 43%;
+    -webkit-transform: translate(-43%);
+    transform: translate(-43%)
+}
+
+.findAvailDates {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    left: 50%;
+    position: absolute;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.findAvailDates .CheckAvailability {
+    padding: 5px 10px
+}
+
+.CheckAvailability.ApplyBtnCustom {
+    background: #ebebeb;
+    border: 1px solid #ebebeb;
+    font-size: 14px;
+    z-index: 9
+}
+
+.findAvailChkInOut {
+    display: flex;
+    justify-content: center;
+    position: relative
+}
+
+.findAvailChkInOut .icon-cal {
+    background: transparent !important;
+    height: 20px;
+    left: 50%;
+    overflow: visible !important;
+    overflow: initial !important;
+    padding: 0;
+    position: absolute;
+    right: auto;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 20px;
+    z-index: 9
+}
+
+.findAvailChkInOut .searchBtn {
+    background: #090;
+    border: 0;
+    border-radius: 4px;
+    color: #fff;
+    margin-left: 20px;
+    margin-top: 4px;
+    padding: 7px 20px
+}
+
+.rdrDateDisplay,
+.rdrDefinedRangesWrapper,
+.rdrMonthAndYearPickers {
+    display: none
+}
+
+span.rdrDayNumber {
+    display: inline-block;
+    font-size: 9px;
+    height: auto;
+    left: 0;
+    margin: auto;
+    padding: 4px;
+    right: 0;
+    top: 0
+}
+
+.room-rate {
+    float: left;
+    width: auto
+}
+
+.rdrDayNumber>div {
+    display: block;
+    float: left;
+    line-height: 20px;
+    padding: 5px;
+    width: 100%
+}
+
+.rdrDayNumber>div.room-rate {
+    color: #17762c;
+    float: left;
+    font-size: 10px;
+    font-weight: 500;
+    height: auto;
+    padding: 1px 4px;
+    width: auto
+}
+
+.rdrDayNumber>div span {
+    float: left;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 10px;
+    width: 100%
+}
+
+button.rdrDay {
+    border: 1px solid #ddd;
+    height: 55px
+}
+
+.rdrMonths.rdrMonthsHorizontal .rdrMonth {
+    margin: 0;
+    width: 300px !important
+}
+
+button.rdrDay span.rdrDayNumber {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 11px;
+    font-weight: 500;
+    height: 100%;
+    margin: 0
+}
+
+.rdrDateRangePickerWrapper {
+    margin: auto;
+    width: auto
+}
+
+.room-rate.sold {
+    background: red;
+    border: 1px solid;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px
+}
+
+.room-rate.sold,
+span.rdrStartEdge.rdrEndEdge {
+    color: #fff !important
+}
+
+.rdrDay:not(.rdrDayPassive) .rdrEndEdge~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrInRange~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrSelected~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrStartEdge~.rdrDayNumber span {
+    color: rgba(0, 0, 0, .85) !important
+}
+
+.rdrDay.rdrDayHovered span.rdrDayStartPreview.rdrDayEndPreview,
+.reserve-tax-desc .rs-rm-prc1:last-child,
+button.rdrDay.rdrDayPassive {
+    border: none
+}
+
+span.rdrDayStartPreview.rdrDayEndPreview,
+span.rdrSelected {
+    color: #fff !important
+}
+
+button.rdrDay.rdrDayPassive .rdrDayNumber>div,
+button.rdrDay.rdrDayPassive.rdrDayDisabled .rdrDayNumber>div {
+    background: 0 0;
+    display: none
+}
+
+button.rdrDay.rdrDayPassive.rdrDayDisabled {
+    background: 0 0
+}
+
+.rdrCalendarWrapper {
+    border: 1px solid #ccc;
+    margin: auto;
+    position: relative;
+    width: auto
+}
+
+.rdrMonth .rdrMonthName {
+    background: #0483cc;
+    border-radius: 5px;
+    color: #fff;
+    margin-top: 15px;
+    text-align: center;
+    width: auto
+}
+
+.rdrCalendarWrapper .rdrMonthAndYearWrapper {
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    top: 8px !important;
+    width: 95%
+}
+
+a#navbarDropdownMenuLink {
+    cursor: pointer
+}
+
+.rdrDayDisabled .dpicker-minimumstay,
+.rdrMonthAndYearPickers {
+    display: none
+}
+
+.rdrMonthsVertical {
+    flex-direction: row !important
+}
+
+.rdrCalendarWrapper.rdrDateRangeWrapper {
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .1);
+    left: -80px !important;
+    margin-top: 85px !important;
+    position: absolute;
+    -webkit-transform: translate(-43%);
+    transform: translate(-43%)
+}
+
+.rdrDateDisplayWrapper {
+    display: none
+}
+
+.rdrMonths .rdrDays .rdrDay {
+    box-sizing: border-box
+}
+
+.rdrMonthAndYearWrapper span.rdrMonthAndYearPickers {
+    display: none
+}
+
+@media (max-width: 575px) {
+    .rdrDayNumber>div>span {
+        margin-bottom: 0;
+        margin-top: 5px
+    }
+}
+
+@media only screen and (min-width: 576px) and (max-width:767px) {
+
+    .rdrMonths,
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        width: 100% !important
+    }
+
+    .custom-cal .rdrCalendarWrapper {
+        width: 480px !important
+    }
+}
+
+.rdrCalendarWrapper {
+    background: #fff;
+    box-sizing: border-box;
+    display: inline-flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+.rdrDateDisplay {
+    display: flex;
+    justify-content: space-between
+}
+
+.rdrDateDisplayItem {
+    color: inherit;
+    flex: 1 1;
+    text-align: center;
+    width: 0
+}
+
+.rdrDateDisplayItem+.rdrDateDisplayItem {
+    margin-left: .833em
+}
+
+.rdrDateDisplayItem input {
+    text-align: inherit
+}
+
+.rdrDateDisplayItem input:disabled {
+    cursor: default
+}
+
+.rdrMonthAndYearWrapper {
+    box-sizing: inherit;
+    display: flex;
+    justify-content: space-between
+}
+
+.rdrMonthAndYearPickers {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center
+}
+
+.rdrNextPrevButton {
+    box-sizing: inherit;
+    cursor: pointer;
+    outline: none
+}
+
+.rdrMonths {
+    display: flex
+}
+
+.rdrMonthsVertical {
+    flex-direction: column
+}
+
+.rdrMonthsHorizontal>div>div>div {
+    display: flex;
+    flex-direction: row
+}
+
+.rdrMonth {
+    width: 27.667em
+}
+
+.rdrWeekDays {
+    display: flex
+}
+
+.rdrWeekDay {
+    box-sizing: inherit;
+    flex-basis: 14.28571%;
+    text-align: center
+}
+
+.rdrDays {
+    display: flex;
+    flex-wrap: wrap
+}
+
+.rdrInfiniteMonths {
+    overflow: auto
+}
+
+.rdrDateRangeWrapper {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+.rdrDateInput {
+    position: relative
+}
+
+.rdrDateInput input {
+    outline: none
+}
+
+.rdrDateInput .rdrWarning {
+    color: red;
+    font-size: 1.6em;
+    line-height: 1.6em;
+    position: absolute;
+    right: .25em;
+    top: 0
+}
+
+.rdrDay {
+    box-sizing: inherit;
+    cursor: pointer;
+    font: inherit;
+    position: relative;
+    width: 14.28571%
+}
+
+.rdrDayNumber {
+    display: block;
+    position: relative
+}
+
+.rdrDayNumber span {
+    color: #1d2429
+}
+
+.rdrDayDisabled {
+    cursor: not-allowed
+}
+
+@supports (-ms-ime-align:auto) {
+    .rdrDay {
+        flex-basis: 14.285% !important
+    }
+}
+
+.rdrEndEdge,
+.rdrInRange,
+.rdrSelected,
+.rdrStartEdge {
+    pointer-events: none
+}
+
+.rdrDateRangePickerWrapper {
+    display: inline-flex;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+.rdrStaticRanges {
+    display: flex;
+    flex-direction: column
+}
+
+.rdrStaticRange {
+    font-size: inherit
+}
+
+.rdrInputRange {
+    display: flex
+}
+
+.rdrCalendarWrapper {
+    color: #000;
+    font-size: 12px
+}
+
+.rdrDateDisplayWrapper {
+    background-color: #eff2f7
+}
+
+.rdrDateDisplay {
+    margin: .833em
+}
+
+.rdrDateDisplayItem {
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px 0 rgba(35, 57, 66, .21)
+}
+
+.rdrDateDisplayItem input {
+    background: transparent;
+    border: 0;
+    color: #849095;
+    cursor: pointer;
+    height: 2.5em;
+    line-height: 2.5em;
+    width: 100%
+}
+
+.rdrDateDisplayItemActive {
+    border-color: currentColor
+}
+
+.rdrDateDisplayItemActive input {
+    color: #7d888d
+}
+
+.rdrMonthAndYearWrapper {
+    align-items: center;
+    height: 60px;
+    padding-top: 10px
+}
+
+.rdrMonthAndYearPickers {
+    font-weight: 600
+}
+
+.rdrMonthAndYearPickers select {
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    background: url("data:image/svg+xml;utf8,<svg width=%279px%27 height=%276px%27 viewBox=%270 0 9 6%27 version=%271.1%27 xmlns=%27http://www.w3.org/2000/svg%27 xmlns:xlink=%27http://www.w3.org/1999/xlink%27><g id=%27Artboard%27 stroke=%27none%27 stroke-width=%271%27 fill=%27none%27 fill-rule=%27evenodd%27 transform=%27translate%28-636.000000, -171.000000%29%27 fill-opacity=%270.368716033%27><g id=%27input%27 transform=%27translate%28172.000000, 37.000000%29%27 fill=%27%230E242F%27 fill-rule=%27nonzero%27><g id=%27Group-9%27 transform=%27translate%28323.000000, 127.000000%29%27><path d=%27M142.280245,7.23952813 C141.987305,6.92353472 141.512432,6.92361662 141.219585,7.23971106 C140.926739,7.5558055 140.926815,8.06821394 141.219755,8.38420735 L145.498801,13 L149.780245,8.38162071 C150.073185,8.0656273 150.073261,7.55321886 149.780415,7.23712442 C149.487568,6.92102998 149.012695,6.92094808 148.719755,7.23694149 L145.498801,10.7113732 L142.280245,7.23952813 Z%27 id=%27arrow%27></path></g></g></g></svg>") no-repeat;
+    background-position: right 8px center;
+    border: 0;
+    border-radius: 4px;
+    color: #3e484f;
+    cursor: pointer;
+    outline: 0;
+    padding: 10px 30px 10px 10px;
+    text-align: center
+}
+
+.rdrMonthAndYearPickers select:hover {
+    background-color: rgba(0, 0, 0, .07)
+}
+
+.rdrMonthPicker,
+.rdrYearPicker {
+    margin: 0 5px
+}
+
+.rdrNextPrevButton {
+    background: #eff2f7;
+    border: 0;
+    border-radius: 5px;
+    display: block;
+    height: 24px;
+    margin: 0 .833em;
+    padding: 0;
+    width: 24px
+}
+
+.rdrNextPrevButton:hover {
+    background: #e1e7f0
+}
+
+.rdrNextPrevButton i {
+    border-style: solid;
+    display: block;
+    height: 0;
+    margin: auto;
+    padding: 0;
+    text-align: center;
+    transform: translate(-3px);
+    width: 0
+}
+
+.rdrPprevButton i {
+    border-color: transparent #34495e transparent transparent;
+    border-width: 4px 6px 4px 4px;
+    transform: translate(-3px)
+}
+
+.rdrNextButton i {
+    border-color: transparent transparent transparent #34495e;
+    border-width: 4px 4px 4px 6px;
+    margin: 0 0 0 7px;
+    transform: translate(3px)
+}
+
+.rdrWeekDays {
+    padding: 0 .833em
+}
+
+.rdrMonth {
+    padding: 0 .833em 1.666em
+}
+
+.rdrMonth .rdrWeekDays {
+    padding: 0
+}
+
+.rdrMonths.rdrMonthsVertical .rdrMonth:first-child .rdrMonthName {
+    display: none
+}
+
+.rdrWeekDay {
+    color: #849095;
+    font-weight: 400;
+    line-height: 2.667em
+}
+
+.rdrDay {
+    background: transparent;
+    border: 0;
+    color: #1d2429;
+    height: 3em;
+    line-height: 3em;
+    padding: 0;
+    text-align: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+.rdrDay:focus {
+    outline: 0
+}
+
+.rdrDayNumber {
+    align-items: center;
+    bottom: 0;
+    bottom: 5px;
+    display: flex;
+    font-weight: 300;
+    justify-content: center;
+    left: 0;
+    outline: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    top: 5px
+}
+
+.rdrDayToday .rdrDayNumber span {
+    font-weight: 500
+}
+
+.rdrDayToday .rdrDayNumber span:after {
+    background: #3d91ff;
+    border-radius: 2px;
+    bottom: 4px;
+    content: "";
+    height: 2px;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%);
+    width: 18px
+}
+
+.rdrDayToday:not(.rdrDayPassive) .rdrEndEdge~.rdrDayNumber span:after,
+.rdrDayToday:not(.rdrDayPassive) .rdrInRange~.rdrDayNumber span:after,
+.rdrDayToday:not(.rdrDayPassive) .rdrSelected~.rdrDayNumber span:after,
+.rdrDayToday:not(.rdrDayPassive) .rdrStartEdge~.rdrDayNumber span:after {
+    background: #fff
+}
+
+.rdrDay:not(.rdrDayPassive) .rdrEndEdge~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrInRange~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrSelected~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrStartEdge~.rdrDayNumber span {
+    color: hsla(0, 0%, 100%, .85)
+}
+
+.rdrEndEdge,
+.rdrInRange,
+.rdrSelected,
+.rdrStartEdge {
+    background: currentColor;
+    bottom: 5px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 5px
+}
+
+.rdrSelected {
+    left: 2px;
+    right: 2px
+}
+
+.rdrStartEdge {
+    border-bottom-left-radius: 1.042em;
+    border-top-left-radius: 1.042em;
+    left: 2px
+}
+
+.rdrEndEdge {
+    border-bottom-right-radius: 1.042em;
+    border-top-right-radius: 1.042em;
+    right: 2px
+}
+
+.rdrSelected {
+    border-radius: 1.042em
+}
+
+.rdrDayStartOfMonth .rdrEndEdge,
+.rdrDayStartOfMonth .rdrInRange,
+.rdrDayStartOfWeek .rdrEndEdge,
+.rdrDayStartOfWeek .rdrInRange {
+    border-bottom-left-radius: 1.042em;
+    border-top-left-radius: 1.042em;
+    left: 2px
+}
+
+.rdrDayEndOfMonth .rdrInRange,
+.rdrDayEndOfMonth .rdrStartEdge,
+.rdrDayEndOfWeek .rdrInRange,
+.rdrDayEndOfWeek .rdrStartEdge {
+    border-bottom-right-radius: 1.042em;
+    border-top-right-radius: 1.042em;
+    right: 2px
+}
+
+.rdrDayStartOfMonth .rdrDayEndPreview,
+.rdrDayStartOfMonth .rdrDayInPreview,
+.rdrDayStartOfWeek .rdrDayEndPreview,
+.rdrDayStartOfWeek .rdrDayInPreview {
+    border-bottom-left-radius: 1.333em;
+    border-left-width: 1px;
+    border-top-left-radius: 1.333em;
+    left: 0
+}
+
+.rdrDayEndOfMonth .rdrDayInPreview,
+.rdrDayEndOfMonth .rdrDayStartPreview,
+.rdrDayEndOfWeek .rdrDayInPreview,
+.rdrDayEndOfWeek .rdrDayStartPreview {
+    border-bottom-right-radius: 1.333em;
+    border-right-width: 1px;
+    border-top-right-radius: 1.333em;
+    right: 0
+}
+
+.rdrDayEndPreview,
+.rdrDayInPreview,
+.rdrDayStartPreview {
+    background: hsla(0, 0%, 100%, .09);
+    border: 0 solid;
+    bottom: 3px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 3px;
+    z-index: 1
+}
+
+.rdrDayStartPreview {
+    border-bottom-left-radius: 1.333em;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 1.333em;
+    border-top-width: 1px;
+    left: 0
+}
+
+.rdrDayInPreview {
+    border-bottom-width: 1px;
+    border-top-width: 1px
+}
+
+.rdrDayEndPreview {
+    border-bottom-right-radius: 1.333em;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    border-top-right-radius: 1.333em;
+    border-top-width: 1px;
+    right: 2px;
+    right: 0
+}
+
+.rdrDefinedRangesWrapper {
+    background: #fff;
+    border-right: 1px solid #eff2f7;
+    font-size: 12px;
+    width: 226px
+}
+
+.rdrDefinedRangesWrapper .rdrStaticRangeSelected {
+    color: currentColor;
+    font-weight: 600
+}
+
+.rdrStaticRange {
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid #eff2f7;
+    cursor: pointer;
+    display: block;
+    outline: 0;
+    padding: 0
+}
+
+.rdrStaticRange:focus .rdrStaticRangeLabel,
+.rdrStaticRange:hover .rdrStaticRangeLabel {
+    background: #eff2f7
+}
+
+.rdrStaticRangeLabel {
+    display: block;
+    line-height: 18px;
+    outline: 0;
+    padding: 10px 20px;
+    text-align: left
+}
+
+.rdrInputRanges {
+    padding: 10px 0
+}
+
+.rdrInputRange {
+    align-items: center;
+    padding: 5px 20px
+}
+
+.rdrInputRangeInput {
+    border: 1px solid #dee7eb;
+    border-radius: 4px;
+    color: #6c767a;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 10px;
+    text-align: center;
+    width: 30px
+}
+
+.rdrInputRangeInput:focus,
+.rdrInputRangeInput:hover {
+    border-color: #b4bfc4;
+    color: #333;
+    outline: 0
+}
+
+.rdrCalendarWrapper:not(.rdrDateRangeWrapper) .rdrDayHovered .rdrDayNumber:after {
+    background: transparent;
+    border: 1px solid;
+    border-radius: 1.333em;
+    bottom: -2px;
+    content: "";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: -2px
+}
+
+.rdrDayPassive {
+    pointer-events: none
+}
+
+.rdrDayPassive .rdrDayNumber span {
+    color: #d5dce0
+}
+
+.rdrDayPassive .rdrDayEndPreview,
+.rdrDayPassive .rdrDayInPreview,
+.rdrDayPassive .rdrDayStartPreview,
+.rdrDayPassive .rdrEndEdge,
+.rdrDayPassive .rdrInRange,
+.rdrDayPassive .rdrSelected,
+.rdrDayPassive .rdrStartEdge {
+    display: none
+}
+
+.rdrDayDisabled {
+    background-color: #f8f8f8
+}
+
+.rdrDayDisabled .rdrDayNumber span {
+    color: #aeb9bf
+}
+
+.rdrDayDisabled .rdrDayEndPreview,
+.rdrDayDisabled .rdrDayInPreview,
+.rdrDayDisabled .rdrDayStartPreview,
+.rdrDayDisabled .rdrEndEdge,
+.rdrDayDisabled .rdrInRange,
+.rdrDayDisabled .rdrSelected,
+.rdrDayDisabled .rdrStartEdge {
+    filter: grayscale(100%) opacity(60%)
+}
+
+.rdrMonthName {
+    color: #849095;
+    font-weight: 600;
+    padding: .833em;
+    text-align: left
+}
+
+.sticky-sidebar .rdrCalendarWrapper.rdrDateRangeWrapper {
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .1);
+    left: -200px !important;
+    margin-top: 85px !important;
+    position: absolute;
+    -webkit-transform: translate(-43%);
+    transform: translate(-43%)
+}
+
+
+@media screen and (max-width: 1199px) {
+    div#quickbook-widget .MbsSearchWidget .flexibleDate {
+        line-height: 10px;
+        margin-top: 15px
+    }
+
+    div#quickbook-widget .MbsSearchWidget {
+        margin: 0 20px;
+        max-width: 100%;
+        width: auto
+    }
+}
+
+@media screen and (max-width: 991px) {
+    .skelton {
+        margin: 0 20px !important;
+        max-width: 100% !important;
+        width: auto !important
+    }
+}
+
+@media screen and (max-width: 941px) {
+    div#quickbook-widget .MbsSearchWidget {
+        row-gap: 5px
+    }
+}
+
+@media screen and (max-width: 839px) {
+    div#quickbook-widget .MbsSearchWidget {
+        row-gap: 15px
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .rdrCalendarWrapper.rdrDateRangeWrapper {
+        left: 0 !important;
+    }
+
+    .rdrMonths.rdrMonthsHorizontal .rdrMonth {
+        margin: 0;
+        padding: 0 5px 5px;
+        width: 285px !important
+    }
+
+    #quickbook-widget .searchinOut.formGroup {
+        margin-right: 0
+    }
+
+    .searchinOut.formGroup+.formGroup {
+        flex: auto;
+        margin-bottom: 0
+    }
+
+    #quickbook-widget .searchinOut.formGroup .mbs-arrow {
+        left: -33px !important
+    }
+
+    #quickbook-widget .formGroup,
+    #quickbook-widget .searchBlock {
+        width: auto
+    }
+
+    div#quickbook-widget .MbsSearchWidget .searchinOut {
+        flex: 100% 1;
+        width: 100%
+    }
+
+    div#quickbook-widget .MbsSearchWidget .formGroup .input,
+    div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom,
+    div#quickbook-widget .MbsSearchWidget .formGroup+.formGroup .input {
+        padding-right: 0;
+        width: 100%
+    }
+
+    div#quickbook-widget .MbsSearchWidget .checkinDate.startDate,
+    div#quickbook-widget .MbsSearchWidget .checkinDate.endDate,
+    div#quickbook-widget .MbsSearchWidget .formGroup .input .endDate {
+        min-width: auto;
+        height: 60px !important;
+    }
+
+    div#quickbook-widget .MbsSearchWidget .checkinDate.endDate {
+        height: 60px !important;
+    }
+
+    div#quickbook-widget .MbsSearchWidget .formGroup .input.flexibleDate {
+        margin-top: 20px;
+        padding-left: 10px
+    }
+
+    div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom {
+        padding-left: 0
+    }
+
+    div#quickbook-widget .MbsSearchWidget {
+        max-width: 90%;
+        width: auto
+    }
+
+    div#quickbook-widget .MbsSearchWidget .prop-lists .checkinDate.HeaderDropDown {
+        margin-right: 0;
+        width: 100%
+    }
+
+    div#quickbook-widget .MbsSearchWidget .prop-lists {
+        margin-right: 0;
+        max-width: 100%;
+        width: 100%
+    }
+
+    .skelton {
+        align-items: center;
+        margin: 0 20px
+    }
+
+    .skeleton-loader {
+        width: 100% !important
+    }
+
+    .skelton-wrapper-1 {
+        width: 100%
+    }
+
+    .skelton-wrapper-2 {
+        flex: 60% 1;
+        margin-bottom: 0;
+        width: auto
+    }
+
+    .skelton-wrapper-3 {
+        flex: auto;
+        margin-bottom: 0;
+        width: 100%
+    }
+
+    .skeleton-loader-third {
+        position: relative;
+        top: 10px;
+        width: 100px !important
+    }
+}
+
+@media screen and (max-width: 643px) {
+    div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+        margin-right: 0
+    }
+
+    #quickbook-widget .searchBlock {
+        max-width: 100% !important;
+        width: 100%
+    }
+
+    .skeleton-loader-third {
+        width: 135px !important
+    }
+}
+
+@media only screen and (max-width: 624px) {
+    .skelton-wrapper-4 {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        width: 100%
+    }
+}
+
+@media screen and (max-width: 502px) {
+    div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+        width: 88%
+    }
+
+    .skelton-wrapper-2 {
+        flex: 70% 1
+    }
+}
+
+@media screen and (max-width: 512px) and (min-width:490px) {
+    #quickbook-widget .formGroup {
+        flex: auto
+    }
+
+    div#quickbook-widget .MbsSearchWidget .formGroup .input.inputRoom .d-flex {
+        margin-right: 0
+    }
+
+    #quickbook-widget .formGroup:nth-child(2) {
+        margin-right: 7px
+    }
+}
+
+@media screen and (max-width: 489px) {
+    div#quickbook-widget .MbsSearchWidget .selectrow {
+        gap: 10px
+    }
+
+    div#quickbook-widget .MbsSearchWidget .checkinDate {
+        margin-right: 0 !important
+    }
+
+    .skelton {
+        flex-direction: column
+    }
+
+    .skelton-wrapper-2 {
+        width: 100%
+    }
+
+    #quickbook-widget .formGroup {
+        flex: auto
+    }
+
+    #quickbook-widget .searchBlock {
+        width: auto
+    }
+}
+
+@media only screen and (max-width: 414px) {
+    div#quickbook-widget .MbsSearchWidget .formGroup .checkinDate {
+        margin-right: 0 !important
+    }
+}
+
+@media screen and (max-width: 407px) {
+    div#quickbook-widget .MbsSearchWidget .formGroup .checkinDate {
+        margin-bottom: 20px
+    }
+
+    div#quickbook-widget .MbsSearchWidget {
+        row-gap: 0
+    }
+
+    div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+        width: 85%
+    }
+
+    #quickbook-widget .searchBlock {
+        top: auto
+    }
+
+    #quickbook-widget .searchinOut.formGroup .mbs-arrow {
+        left: -20px !important;
+        top: 10px
+    }
+}
+
+@media screen and (max-width: 375px) {
+    div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+        width: 100% !important
+    }
+}
+
+@media screen and (max-width: 340px) {
+    #quickbook-widget .formGroup {
+        flex: 50% 1
+    }
+
+    div#quickbook-widget .MbsSearchWidget .checkinDate.promocode {
+        width: 80%
+    }
+}
