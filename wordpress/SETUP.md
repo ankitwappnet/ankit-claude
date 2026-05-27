@@ -2,39 +2,7 @@
 
 This package converts the existing static site at `public_html/` into a dynamic WordPress site using **Divi** as the parent theme.
 
-## 🚀 Zero-setup local install (Docker)
-
-If you have Docker Desktop installed, this is the fastest path:
-
-```bash
-# 1. Drop your licensed zips into wordpress/docker/uploads/
-#    (Divi.zip from Elegant Themes, acf-pro.zip from ACF — both renamed exactly)
-
-# 2. Copy original assets into the child theme (one-time)
-bash wordpress/scripts/copy-assets.sh
-
-# 3. Spin up the stack
-cd wordpress/docker
-docker compose up -d
-
-# 4. Wait ~60 seconds, then open:
-#    Site:        http://localhost:8080
-#    WP-Admin:    http://localhost:8080/wp-admin   (admin / admin)
-#    phpMyAdmin:  http://localhost:8081            (hc_wp / hc_wp)
-```
-
-The `installer` container automatically:
-- Installs WordPress core
-- Installs and activates Divi from your zip
-- Installs and activates ACF Pro (or falls back to free ACF)
-- Activates the child theme + 3 custom plugins
-- Runs all seeders: 5 rooms, ~150 media attachments, ACF Site Content, all pages, primary menu, permalinks, front page
-
-**To re-run the install:** `docker compose down -v && docker compose up -d` (wipes DB + uploads volumes).
-
----
-
-## Manual install (existing WordPress, XAMPP, Local by Flywheel, production hosting)
+## Install steps (XAMPP / Local by Flywheel / MAMP / production hosting)
 
 ## What's in this package
 
