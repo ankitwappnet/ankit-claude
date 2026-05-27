@@ -37,6 +37,9 @@ class HC_CLI_Command {
         delete_option( 'hc_rooms_seeded' );
         delete_option( 'hc_site_content_seeded' );
         delete_option( 'hc_pages_seeded' );
+        delete_option( 'hc_rooms_seeded_v2' );
+        delete_option( 'hc_site_content_seeded_v2' );
+        delete_option( 'hc_pages_seeded_v2' );
         WP_CLI::log( '→ Flags cleared. Re-seeding...' );
         $this->install();
     }
@@ -52,9 +55,9 @@ class HC_CLI_Command {
         $pages_count = wp_count_posts( 'page' );
 
         WP_CLI::log( '' );
-        WP_CLI::log( '  Rooms seeded:        ' . ( get_option( 'hc_rooms_seeded' )        ? 'yes' : 'no' ) );
-        WP_CLI::log( '  Site content seeded: ' . ( get_option( 'hc_site_content_seeded' ) ? 'yes' : 'no' ) );
-        WP_CLI::log( '  Pages seeded:        ' . ( get_option( 'hc_pages_seeded' )        ? 'yes' : 'no' ) );
+        WP_CLI::log( '  Rooms seeded:        ' . ( get_option( 'hc_rooms_seeded_v2' )        ? 'yes' : 'no' ) );
+        WP_CLI::log( '  Site content seeded: ' . ( get_option( 'hc_site_content_seeded_v2' ) ? 'yes' : 'no' ) );
+        WP_CLI::log( '  Pages seeded:        ' . ( get_option( 'hc_pages_seeded_v2' )        ? 'yes' : 'no' ) );
         WP_CLI::log( '' );
         WP_CLI::log( '  Rooms (published):   ' . intval( $rooms_count->publish ?? 0 ) );
         WP_CLI::log( '  Pages (published):   ' . intval( $pages_count->publish ?? 0 ) );

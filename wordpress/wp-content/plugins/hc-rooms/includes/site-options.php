@@ -2,187 +2,40 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Site-wide content stored in an ACF Options page so the client can edit:
- *  - Gallery (lightbox + filter categories)
- *  - Testimonials
- *  - Awards / certificates
- *  - Footer / contact info
- *  - Hero carousel slides (home page)
- *  - Facility icons (home page "Why Choose Us")
+ * Site-wide content stored as native WP options (no ACF dependency).
  *
- * This lives in the rooms plugin for convenience — could be split out later.
+ * On admin_init this seeder writes the original site's content into wp_options.
+ * Idempotent: controlled by `hc_site_content_seeded_v2` option flag.
+ *
+ * v2 — replaces ACF Options Page from the original implementation. Everything
+ * is just plain options now (auto-serialized by WP). A read-only viewer in
+ * Settings → Site Content lets you confirm what was seeded.
  */
 
-add_action( 'acf/init', function () {
-
-    if ( ! function_exists( 'acf_add_options_page' ) ) return;
-
-    acf_add_options_page( array(
-        'page_title' => 'Hotel Cosmopolitan — Site Content',
-        'menu_title' => 'Site Content',
-        'menu_slug'  => 'hc-site-content',
-        'icon_url'   => 'dashicons-admin-customizer',
-        'position'   => 22,
-        'capability' => 'manage_options',
-        'autoload'   => true,
-    ) );
-
-    acf_add_local_field_group( array(
-        'key'    => 'group_hc_site_content',
-        'title'  => 'Site Content',
-        'fields' => array(
-
-            // ===== TAB: Contact =====
-            array( 'key' => 'tab_contact', 'label' => 'Contact', 'type' => 'tab' ),
-            array( 'key' => 'hc_address',         'name' => 'address',         'label' => 'Address',         'type' => 'textarea', 'rows' => 2 ),
-            array( 'key' => 'hc_phones',          'name' => 'phones',          'label' => 'Phone Numbers',   'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_phone_label', 'name' => 'label', 'label' => 'Label', 'type' => 'text' ),
-                    array( 'key' => 'hc_phone_value', 'name' => 'value', 'label' => 'Number', 'type' => 'text' ),
-                ),
-            ),
-            array( 'key' => 'hc_emails',          'name' => 'emails',          'label' => 'Emails',          'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_email_value', 'name' => 'value', 'label' => 'Email', 'type' => 'email' ),
-                ),
-            ),
-            array( 'key' => 'hc_map_url',         'name' => 'map_url',         'label' => 'Google Maps Embed URL', 'type' => 'url' ),
-            array( 'key' => 'hc_facebook',        'name' => 'facebook_url',    'label' => 'Facebook URL',    'type' => 'url' ),
-            array( 'key' => 'hc_instagram',       'name' => 'instagram_url',   'label' => 'Instagram URL',   'type' => 'url' ),
-
-            // ===== TAB: Hero Carousel =====
-            array( 'key' => 'tab_hero', 'label' => 'Home Hero', 'type' => 'tab' ),
-            array( 'key' => 'hc_hero_slides', 'name' => 'hero_slides', 'label' => 'Hero Slides', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_hero_image',  'name' => 'image',  'label' => 'Background Image', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_hero_title',  'name' => 'title',  'label' => 'Heading', 'type' => 'text' ),
-                    array( 'key' => 'hc_hero_rating_source', 'name' => 'rating_source', 'label' => 'Rating Source (e.g. Google)', 'type' => 'text' ),
-                    array( 'key' => 'hc_hero_rating_icon',   'name' => 'rating_icon',   'label' => 'Rating Icon', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_hero_rating_value',  'name' => 'rating_value',  'label' => 'Rating Value', 'type' => 'text', 'placeholder' => '4.9' ),
-                    array( 'key' => 'hc_hero_rating_count',  'name' => 'rating_count',  'label' => 'Review Count', 'type' => 'text', 'placeholder' => '1164' ),
-                ),
-            ),
-
-            // ===== TAB: Facilities (Home page "Why Choose Us") =====
-            array( 'key' => 'tab_facilities', 'label' => 'Facilities Icons', 'type' => 'tab' ),
-            array( 'key' => 'hc_facilities', 'name' => 'facility_icons', 'label' => 'Facility Icons', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_fac_icon',  'name' => 'icon',  'label' => 'Icon', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_fac_label', 'name' => 'label', 'label' => 'Label', 'type' => 'text' ),
-                ),
-            ),
-
-            // ===== TAB: Gallery =====
-            array( 'key' => 'tab_gallery', 'label' => 'Gallery', 'type' => 'tab' ),
-            array( 'key' => 'hc_gallery', 'name' => 'gallery', 'label' => 'Gallery Items', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_gal_image',    'name' => 'image',    'label' => 'Image', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_gal_category', 'name' => 'category', 'label' => 'Category', 'type' => 'select',
-                        'choices' => array(
-                            'room'        => 'Room',
-                            'reception'   => 'Reception',
-                            'restaurent'  => 'Restaurant',
-                            'hall'        => 'Banquet Hall',
-                            'corridor'    => 'Corridor',
-                        ),
-                    ),
-                ),
-            ),
-
-            // ===== TAB: Testimonials =====
-            array( 'key' => 'tab_testimonials', 'label' => 'Testimonials', 'type' => 'tab' ),
-            array( 'key' => 'hc_testimonials', 'name' => 'testimonials', 'label' => 'Reviews', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_ts_name',   'name' => 'name',   'label' => 'Name', 'type' => 'text' ),
-                    array( 'key' => 'hc_ts_review', 'name' => 'review', 'label' => 'Review', 'type' => 'textarea', 'rows' => 4 ),
-                    array( 'key' => 'hc_ts_stars',  'name' => 'stars',  'label' => 'Stars (1–5)', 'type' => 'number', 'min' => 1, 'max' => 5, 'default_value' => 5 ),
-                ),
-            ),
-
-            // ===== TAB: Awards =====
-            array( 'key' => 'tab_awards', 'label' => 'Awards', 'type' => 'tab' ),
-            array( 'key' => 'hc_awards', 'name' => 'awards', 'label' => 'Awards / Certificates', 'type' => 'gallery',
-                'return_format' => 'array',
-                'preview_size'  => 'medium',
-            ),
-
-            // ===== TAB: Restaurant =====
-            array( 'key' => 'tab_restaurant', 'label' => 'Restaurant', 'type' => 'tab' ),
-            array( 'key' => 'hc_rest_hours', 'name' => 'restaurant_hours', 'label' => 'Restaurant Hours', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_rh_meal', 'name' => 'meal', 'label' => 'Meal', 'type' => 'text' ),
-                    array( 'key' => 'hc_rh_time', 'name' => 'time', 'label' => 'Time', 'type' => 'text' ),
-                ),
-            ),
-            array( 'key' => 'hc_rest_qr',      'name' => 'restaurant_qr',      'label' => 'Menu QR Code', 'type' => 'image', 'return_format' => 'array' ),
-            array( 'key' => 'hc_rest_reserve', 'name' => 'restaurant_reserve_url', 'label' => 'Reservation URL', 'type' => 'url' ),
-
-            // ===== TAB: Awards heading / banquet / conference categories =====
-            array( 'key' => 'tab_facilities_cats', 'label' => 'Facility Categories', 'type' => 'tab' ),
-            array( 'key' => 'hc_banquet_cats', 'name' => 'banquet_categories', 'label' => 'Banquet Hall — Event Categories', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_bcat_image', 'name' => 'image', 'label' => 'Image', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_bcat_label', 'name' => 'label', 'label' => 'Label', 'type' => 'text' ),
-                ),
-            ),
-            array( 'key' => 'hc_conf_cats', 'name' => 'conference_categories', 'label' => 'Conference / Board Room — Use Categories', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_ccat_image', 'name' => 'image', 'label' => 'Image', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_ccat_label', 'name' => 'label', 'label' => 'Label', 'type' => 'text' ),
-                ),
-            ),
-            array( 'key' => 'hc_rest_cuisines', 'name' => 'restaurant_cuisines', 'label' => 'Restaurant Cuisines', 'type' => 'repeater',
-                'sub_fields' => array(
-                    array( 'key' => 'hc_cu_image', 'name' => 'image', 'label' => 'Image', 'type' => 'image', 'return_format' => 'array' ),
-                    array( 'key' => 'hc_cu_label', 'name' => 'label', 'label' => 'Label', 'type' => 'text' ),
-                ),
-            ),
-        ),
-        'location' => array(
-            array(
-                array(
-                    'param'    => 'options_page',
-                    'operator' => '==',
-                    'value'    => 'hc-site-content',
-                ),
-            ),
-        ),
-    ) );
-} );
-
-
-/**
- * One-time seed of site content (Gallery + Testimonials + Awards + Hero slides + Contact info + Restaurant hours).
- * Runs on admin_init after rooms are seeded.
- *
- * Idempotent: `hc_site_content_seeded` option flag.
- */
 add_action( 'admin_init', 'hc_site_content_seed', 30 );
 
 function hc_site_content_seed() {
 
-    if ( get_option( 'hc_site_content_seeded' ) ) return;
-    if ( ! function_exists( 'update_field' ) ) return;
+    if ( get_option( 'hc_site_content_seeded_v2' ) ) return;
 
     // ===== Contact (from component/footer.php) =====
-    update_field( 'address', 'Darshan Society Road, Near Stadium Circle, Navrangpura, Ahmedabad - 380009', 'option' );
-    update_field( 'phones', array(
+    hc_set( 'address', 'Darshan Society Road, Near Stadium Circle, Navrangpura, Ahmedabad - 380009' );
+    hc_set( 'phones', array(
         array( 'label' => 'Reservations', 'value' => '+91-90-9991-4802' ),
         array( 'label' => 'Reservations', 'value' => '+91-90-9991-4811' ),
         array( 'label' => 'Front Desk',   'value' => '+91-79-6601-6601' ),
         array( 'label' => 'Front Desk',   'value' => '+91-79-2642-6001' ),
-    ), 'option' );
-    update_field( 'emails', array(
+    ) );
+    hc_set( 'emails', array(
         array( 'value' => 'reserve@hotelcosmopolitan.in' ),
         array( 'value' => 'ceo@hotelcosmopolitan.in' ),
-    ), 'option' );
-    update_field( 'map_url',       'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d458.9406990288283!2d72.56015249452327!3d23.04118482332241!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e85d868252e09%3A0x2a7e419c53933ac6!2sHotel%20Cosmopolitan!5e0!3m2!1sen!2sin!4v1742808600129!5m2!1sen!2sin', 'option' );
-    update_field( 'facebook_url',  'https://www.facebook.com/hotelcosmopolitanabad', 'option' );
-    update_field( 'instagram_url', '', 'option' );
+    ) );
+    hc_set( 'map_url',       'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d458.9406990288283!2d72.56015249452327!3d23.04118482332241!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e85d868252e09%3A0x2a7e419c53933ac6!2sHotel%20Cosmopolitan!5e0!3m2!1sen!2sin!4v1742808600129!5m2!1sen!2sin' );
+    hc_set( 'facebook_url',  'https://www.facebook.com/hotelcosmopolitanabad' );
+    hc_set( 'instagram_url', '' );
 
     // ===== Hero Carousel (from index.php) =====
-    // Try to import the home images if they exist; fall back to null if not.
-    $hero_imgs = hc_import_directory( 'images/home' );
+    $hero_imgs   = hc_import_directory( 'images/home' );
     $google_icon = hc_import_attachment( 'images/icons/google.webp' );
     $trip_icon   = hc_import_attachment( 'images/icons/tripadvisor.webp' );
     $mmt_icon    = hc_import_attachment( 'images/icons/mmt.webp' );
@@ -190,17 +43,17 @@ function hc_site_content_seed() {
     $book_icon   = hc_import_attachment( 'images/icons/booking.webp' );
 
     $slides = array(
-        array( 'title' => '3 Star Hotel Near Navrangpura in Ahmedabad',                                          'rating_source' => 'Google',        'rating_value' => '4.9', 'rating_count' => '1164', 'rating_icon' => is_wp_error( $google_icon ) ? '' : $google_icon ),
-        array( 'title' => 'Your comfort is our priority and it shows in every corner of our rooms',              'rating_source' => 'TripAdvisor',   'rating_value' => '4.5', 'rating_count' => '282',  'rating_icon' => is_wp_error( $trip_icon ) ? '' : $trip_icon ),
-        array( 'title' => 'Embark on a culinary adventure that will leave you craving for more',                 'rating_source' => 'Make My Trip',  'rating_value' => '4.2', 'rating_count' => '262',  'rating_icon' => is_wp_error( $mmt_icon ) ? '' : $mmt_icon ),
-        array( 'title' => 'From weddings to corporate gatherings, our banquet hall sets the perfect stage',      'rating_source' => 'Goibibo',       'rating_value' => '4.4', 'rating_count' => '267',  'rating_icon' => is_wp_error( $goi_icon ) ? '' : $goi_icon ),
-        array( 'title' => 'A space for innovation and collaboration — our Boardroom',                            'rating_source' => 'Booking.com',   'rating_value' => '4.4', 'rating_count' => '267',  'rating_icon' => is_wp_error( $book_icon ) ? '' : $book_icon ),
+        array( 'title' => '3 Star Hotel Near Navrangpura in Ahmedabad',                                          'rating_source' => 'Google',        'rating_value' => '4.9', 'rating_count' => '1164', 'rating_icon' => is_wp_error( $google_icon ) ? 0 : intval( $google_icon ) ),
+        array( 'title' => 'Your comfort is our priority and it shows in every corner of our rooms',              'rating_source' => 'TripAdvisor',   'rating_value' => '4.5', 'rating_count' => '282',  'rating_icon' => is_wp_error( $trip_icon ) ? 0 : intval( $trip_icon ) ),
+        array( 'title' => 'Embark on a culinary adventure that will leave you craving for more',                 'rating_source' => 'Make My Trip',  'rating_value' => '4.2', 'rating_count' => '262',  'rating_icon' => is_wp_error( $mmt_icon ) ? 0 : intval( $mmt_icon ) ),
+        array( 'title' => 'From weddings to corporate gatherings, our banquet hall sets the perfect stage',      'rating_source' => 'Goibibo',       'rating_value' => '4.4', 'rating_count' => '267',  'rating_icon' => is_wp_error( $goi_icon ) ? 0 : intval( $goi_icon ) ),
+        array( 'title' => 'A space for innovation and collaboration — our Boardroom',                            'rating_source' => 'Booking.com',   'rating_value' => '4.4', 'rating_count' => '267',  'rating_icon' => is_wp_error( $book_icon ) ? 0 : intval( $book_icon ) ),
     );
-    // Attach hero images if present (one per slide, in order)
     foreach ( $slides as $i => &$s ) {
-        if ( isset( $hero_imgs[ $i ] ) ) $s['image'] = $hero_imgs[ $i ];
+        $s['image'] = isset( $hero_imgs[ $i ] ) ? intval( $hero_imgs[ $i ] ) : 0;
     }
-    update_field( 'hero_slides', $slides, 'option' );
+    unset( $s );
+    hc_set( 'hero_slides', $slides );
 
     // ===== Facility icons (from index.php "Why Choose Us") =====
     $fac_icons = array(
@@ -214,9 +67,9 @@ function hc_site_content_seed() {
     $fac_rows = array();
     foreach ( $fac_icons as $f ) {
         $id = hc_import_attachment( $f['src'] );
-        $fac_rows[] = array( 'icon' => is_wp_error( $id ) ? '' : $id, 'label' => $f['label'] );
+        $fac_rows[] = array( 'icon' => is_wp_error( $id ) ? 0 : intval( $id ), 'label' => $f['label'] );
     }
-    update_field( 'facility_icons', $fac_rows, 'option' );
+    hc_set( 'facility_icons', $fac_rows );
 
     // ===== Gallery (from gallery.php — with categories) =====
     $gallery_items = array(
@@ -247,12 +100,12 @@ function hc_site_content_seed() {
     foreach ( $gallery_items as $g ) {
         $id = hc_import_attachment( $g['src'] );
         if ( is_wp_error( $id ) ) continue;
-        $gallery_rows[] = array( 'image' => $id, 'category' => $g['category'] );
+        $gallery_rows[] = array( 'image' => intval( $id ), 'category' => $g['category'] );
     }
-    update_field( 'gallery', $gallery_rows, 'option' );
+    hc_set( 'gallery', $gallery_rows );
 
     // ===== Testimonials (from index.php) =====
-    update_field( 'testimonials', array(
+    hc_set( 'testimonials', array(
         array(
             'name'   => 'Hege Nilsen',
             'stars'  => 5,
@@ -268,23 +121,23 @@ function hc_site_content_seed() {
             'stars'  => 5,
             'review' => 'I stayed here for just one night but the experience was wonderful. The hotel is actually at the main road, near the Sardar Patel stadium metro station, also opposite to the Nidhi hospital. One can also find autos for local transfer or can have access to Uber or Ola.',
         ),
-    ), 'option' );
+    ) );
 
     // ===== Awards (from images/certificate/) =====
     $award_ids = hc_import_directory( 'images/certificate' );
-    if ( $award_ids ) update_field( 'awards', $award_ids, 'option' );
+    if ( $award_ids ) hc_set( 'awards', $award_ids );
 
     // ===== Restaurant (from restaurent.php) =====
-    update_field( 'restaurant_hours', array(
+    hc_set( 'restaurant_hours', array(
         array( 'meal' => 'Breakfast', 'time' => '7:30 am to 10:30 am' ),
         array( 'meal' => 'Lunch',     'time' => '12:30 pm to 3:00 pm' ),
         array( 'meal' => 'Dinner',    'time' => '7:00 pm to 11:00 pm' ),
-    ), 'option' );
+    ) );
     $qr = hc_import_attachment( 'images/restaurent/qr.webp' );
-    if ( ! is_wp_error( $qr ) ) update_field( 'restaurant_qr', $qr, 'option' );
-    update_field( 'restaurant_reserve_url', 'https://wa.me/+919099914802?text=Hey%20Hotel%20Cosmopolitan,%20I%20want%20to%20reserve%20a%20table', 'option' );
+    if ( ! is_wp_error( $qr ) ) hc_set( 'restaurant_qr', intval( $qr ) );
+    hc_set( 'restaurant_reserve_url', 'https://wa.me/+919099914802?text=Hey%20Hotel%20Cosmopolitan,%20I%20want%20to%20reserve%20a%20table' );
 
-    // ===== Restaurant cuisines (from images/restaurent/) =====
+    // ===== Restaurant cuisines =====
     $cuisines = array(
         array( 'label' => 'North Indian', 'src' => 'images/restaurent/northindian.webp' ),
         array( 'label' => 'South Indian', 'src' => 'images/restaurent/southindian.webp' ),
@@ -300,11 +153,11 @@ function hc_site_content_seed() {
     $cu_rows = array();
     foreach ( $cuisines as $c ) {
         $id = hc_import_attachment( $c['src'] );
-        $cu_rows[] = array( 'image' => is_wp_error( $id ) ? '' : $id, 'label' => $c['label'] );
+        $cu_rows[] = array( 'image' => is_wp_error( $id ) ? 0 : intval( $id ), 'label' => $c['label'] );
     }
-    update_field( 'restaurant_cuisines', $cu_rows, 'option' );
+    hc_set( 'restaurant_cuisines', $cu_rows );
 
-    // ===== Banquet categories (from images/banquet-hall/) =====
+    // ===== Banquet categories =====
     $banquet = array(
         array( 'label' => 'Wedding',          'src' => 'images/banquet-hall/wedding.webp' ),
         array( 'label' => 'Engagement',       'src' => 'images/banquet-hall/engagement.webp' ),
@@ -316,11 +169,11 @@ function hc_site_content_seed() {
     $b_rows = array();
     foreach ( $banquet as $b ) {
         $id = hc_import_attachment( $b['src'] );
-        $b_rows[] = array( 'image' => is_wp_error( $id ) ? '' : $id, 'label' => $b['label'] );
+        $b_rows[] = array( 'image' => is_wp_error( $id ) ? 0 : intval( $id ), 'label' => $b['label'] );
     }
-    update_field( 'banquet_categories', $b_rows, 'option' );
+    hc_set( 'banquet_categories', $b_rows );
 
-    // ===== Conference categories (from images/corona-hall/) =====
+    // ===== Conference categories =====
     $conf = array(
         array( 'label' => 'Business Meeting',  'src' => 'images/corona-hall/business-meeting.webp' ),
         array( 'label' => 'Community Meeting', 'src' => 'images/corona-hall/community-meeting.webp' ),
@@ -332,9 +185,74 @@ function hc_site_content_seed() {
     $c_rows = array();
     foreach ( $conf as $c ) {
         $id = hc_import_attachment( $c['src'] );
-        $c_rows[] = array( 'image' => is_wp_error( $id ) ? '' : $id, 'label' => $c['label'] );
+        $c_rows[] = array( 'image' => is_wp_error( $id ) ? 0 : intval( $id ), 'label' => $c['label'] );
     }
-    update_field( 'conference_categories', $c_rows, 'option' );
+    hc_set( 'conference_categories', $c_rows );
 
-    update_option( 'hc_site_content_seeded', 1 );
+    update_option( 'hc_site_content_seeded_v2', 1 );
+    delete_option( 'hc_site_content_seeded' );
+}
+
+/**
+ * Read-only admin viewer to confirm what was seeded.
+ * Settings → Site Content.
+ */
+add_action( 'admin_menu', function () {
+    add_options_page(
+        'Site Content',
+        'Site Content',
+        'manage_options',
+        'hc-site-content',
+        'hc_render_site_content_viewer'
+    );
+} );
+
+function hc_render_site_content_viewer() {
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    ?>
+    <div class="wrap">
+        <h1>Site Content (read-only)</h1>
+        <p>Auto-seeded from the original public_html/ site. To edit a value, edit it directly in the database (<code>wp_options</code>, keys prefixed <code>hc_</code>) or via WP-CLI: <code>wp option update hc_address "..."</code></p>
+
+        <table class="widefat striped">
+            <thead><tr><th style="width:200px;">Key</th><th>Value</th></tr></thead>
+            <tbody>
+                <?php
+                $keys = array(
+                    'address', 'phones', 'emails', 'facebook_url', 'instagram_url', 'map_url',
+                    'hero_slides', 'facility_icons', 'gallery', 'testimonials', 'awards',
+                    'restaurant_hours', 'restaurant_cuisines', 'restaurant_qr', 'restaurant_reserve_url',
+                    'banquet_categories', 'conference_categories',
+                );
+                foreach ( $keys as $k ) :
+                    $v = hc_get( $k );
+                    $display = '';
+                    if ( is_array( $v ) ) {
+                        $display = sprintf( '%d items', count( $v ) );
+                        if ( $v ) {
+                            $display .= ' <details><summary style="cursor:pointer;color:#0073aa;">view</summary><pre style="background:#f0f0f1;padding:10px;overflow:auto;max-height:400px;">'
+                                . esc_html( print_r( $v, true ) ) . '</pre></details>';
+                        }
+                    } else {
+                        $display = esc_html( (string) $v );
+                    }
+                    ?>
+                    <tr>
+                        <td><code>hc_<?php echo esc_html( $k ); ?></code></td>
+                        <td><?php echo $display; // already escaped above ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <h2>Seed flags</h2>
+        <table class="widefat striped">
+            <tbody>
+                <tr><td>hc_rooms_seeded_v2</td>        <td><?php echo get_option( 'hc_rooms_seeded_v2' )        ? 'yes' : 'no'; ?></td></tr>
+                <tr><td>hc_site_content_seeded_v2</td> <td><?php echo get_option( 'hc_site_content_seeded_v2' ) ? 'yes' : 'no'; ?></td></tr>
+                <tr><td>hc_pages_seeded_v2</td>        <td><?php echo get_option( 'hc_pages_seeded_v2' )        ? 'yes' : 'no'; ?></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <?php
 }

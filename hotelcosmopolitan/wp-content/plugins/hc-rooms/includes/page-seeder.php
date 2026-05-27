@@ -14,7 +14,7 @@ add_action( 'admin_init', 'hc_pages_seed', 40 );
 
 function hc_pages_seed() {
 
-    if ( get_option( 'hc_pages_seeded' ) ) return;
+    if ( get_option( 'hc_pages_seeded_v2' ) ) return;
 
     // The 9 pages we ship layouts for, in menu order
     $pages = array(
@@ -147,7 +147,8 @@ function hc_pages_seed() {
     // ----- 6. Flush rewrites -----
     flush_rewrite_rules();
 
-    update_option( 'hc_pages_seeded', 1 );
+    update_option( 'hc_pages_seeded_v2', 1 );
+    delete_option( 'hc_pages_seeded' );
 }
 
 /**

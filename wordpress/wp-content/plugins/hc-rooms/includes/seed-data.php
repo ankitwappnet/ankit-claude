@@ -5,16 +5,18 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Seed the 5 room types from the original static site, including images
  * imported into the WP Media Library from the child theme's /assets/images/rooms/ folder.
  *
- * Idempotent: controlled by the `hc_rooms_seeded` option. To re-run, delete that option:
- *   wp option delete hc_rooms_seeded   (WP-CLI)
+ * Idempotent: controlled by the `hc_rooms_seeded_v2` option. To re-run, delete that option:
+ *   wp option delete hc_rooms_seeded_v2   (WP-CLI)
  * or remove the row from wp_options manually, then reload WP-Admin.
+ *
+ * v2 — does NOT require ACF Pro. Stores all room metadata as native post meta
+ * via hc_set() from storage.php.
  */
 add_action( 'admin_init', 'hc_rooms_seed', 20 );
 
 function hc_rooms_seed() {
 
-    if ( get_option( 'hc_rooms_seeded' ) ) return;
-    if ( ! function_exists( 'update_field' ) ) return; // ACF not active yet
+    if ( get_option( 'hc_rooms_seeded_v2' ) ) return;
 
     // ---- Shared amenities (left + right columns from original deluxe-room.php) ----
     $base_amenities_left = array(
@@ -121,38 +123,41 @@ function hc_rooms_seed() {
     $order = 10;
     foreach ( $rooms as $room ) {
 
-        if ( get_page_by_path( $room['slug'], OBJECT, 'room' ) ) {
-            $order += 10;
-            continue;
+        // Find existing by slug (might have been seeded before with old code)
+        $existing = get_page_by_path( $room['slug'], OBJECT, 'room' );
+        $post_id = $existing ? $existing->ID : 0;
+
+        if ( ! $post_id ) {
+            $post_id = wp_insert_post( array(
+                'post_type'    => 'room',
+                'post_status'  => 'publish',
+                'post_title'   => $room['title'],
+                'post_name'    => $room['slug'],
+                'post_content' => $room['content'],
+                'menu_order'   => $order,
+            ) );
+            if ( is_wp_error( $post_id ) || ! $post_id ) continue;
         }
-
-        $post_id = wp_insert_post( array(
-            'post_type'    => 'room',
-            'post_status'  => 'publish',
-            'post_title'   => $room['title'],
-            'post_name'    => $room['slug'],
-            'post_content' => $room['content'],
-            'menu_order'   => $order,
-        ) );
-
-        if ( is_wp_error( $post_id ) || ! $post_id ) continue;
 
         // Import all images from the room's folder
         $image_ids = hc_import_directory( $room['image_dir'] );
 
         if ( $image_ids ) {
             set_post_thumbnail( $post_id, $image_ids[0] );
-            update_field( 'gallery', $image_ids, $post_id );
+            hc_set( 'gallery', $image_ids, $post_id );
         }
 
-        update_field( 'short_description', $room['short'], $post_id );
-        update_field( 'bed_type',          $room['bed'],   $post_id );
-        update_field( 'room_size',         $room['size'],  $post_id );
-        update_field( 'amenities',         array_merge( $room['extra'], $base_amenities_left, $base_amenities_right ), $post_id );
-        update_field( 'booking_options',   $booking_options, $post_id );
+        hc_set( 'short_description', $room['short'], $post_id );
+        hc_set( 'bed_type',          $room['bed'],   $post_id );
+        hc_set( 'room_size',         $room['size'],  $post_id );
+        hc_set( 'amenities',         array_merge( $room['extra'], $base_amenities_left, $base_amenities_right ), $post_id );
+        hc_set( 'booking_options',   $booking_options, $post_id );
 
         $order += 10;
     }
 
-    update_option( 'hc_rooms_seeded', 1 );
+    update_option( 'hc_rooms_seeded_v2', 1 );
+
+    // Also clear the v1 flag so anyone re-running won't have leftover state
+    delete_option( 'hc_rooms_seeded' );
 }

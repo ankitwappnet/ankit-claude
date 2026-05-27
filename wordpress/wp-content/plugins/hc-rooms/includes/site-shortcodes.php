@@ -2,35 +2,36 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Shortcodes that render sections from the ACF Options page (site-options.php).
- * All consumed by the Divi layout JSONs in divi-layouts/.
+ * Site-content shortcodes (no ACF dependency).
+ * Read from wp_options via hc_get().
  */
 
 /**
- * [hc_hero_carousel] — 5-slide Bootstrap carousel matching index.php.
+ * [hc_hero_carousel] — 5-slide carousel matching index.php.
  */
 add_shortcode( 'hc_hero_carousel', function () {
-    $slides = get_field( 'hero_slides', 'option' );
-    if ( ! $slides ) return '';
+    $slides = hc_get( 'hero_slides' );
+    if ( ! is_array( $slides ) || ! $slides ) return '';
 
     ob_start(); ?>
-    <div id="hcHero" class="carousel slide carousel-fade hc-hero-carousel" data-bs-ride="carousel" data-ride="carousel">
+    <div id="hcHero" class="carousel slide hc-hero-carousel">
         <ol class="carousel-indicators">
             <?php foreach ( $slides as $i => $s ) : ?>
-                <li data-bs-target="#hcHero" data-target="#hcHero" data-bs-slide-to="<?php echo $i; ?>" data-slide-to="<?php echo $i; ?>" class="<?php echo 0 === $i ? 'active' : ''; ?>"></li>
+                <li data-target="#hcHero" data-slide-to="<?php echo $i; ?>" class="<?php echo 0 === $i ? 'active' : ''; ?>"></li>
             <?php endforeach; ?>
         </ol>
         <div class="carousel-inner">
             <?php foreach ( $slides as $i => $s ) :
-                $bg = ! empty( $s['image']['url'] ) ? $s['image']['url'] : ''; ?>
+                $bg = ! empty( $s['image'] ) ? hc_image_url( $s['image'], 'full' ) : ''; ?>
                 <div class="carousel-item hc-hero-item<?php echo 0 === $i ? ' active' : ''; ?>" style="<?php echo $bg ? 'background-image:url(' . esc_url( $bg ) . ');' : ''; ?>">
                     <div class="carousel-caption">
                         <h<?php echo 0 === $i ? '1' : '2'; ?>><?php echo wp_kses_post( nl2br( $s['title'] ) ); ?></h<?php echo 0 === $i ? '1' : '2'; ?>>
-                        <?php if ( ! empty( $s['rating_source'] ) ) : ?>
+                        <?php if ( ! empty( $s['rating_source'] ) ) :
+                            $icon_url = ! empty( $s['rating_icon'] ) ? hc_image_url( $s['rating_icon'] ) : ''; ?>
                             <div class="rating">
                                 <span>
-                                    <?php if ( ! empty( $s['rating_icon']['url'] ) ) : ?>
-                                        <img src="<?php echo esc_url( $s['rating_icon']['url'] ); ?>" alt="<?php echo esc_attr( $s['rating_source'] ); ?>" class="img-fluid">
+                                    <?php if ( $icon_url ) : ?>
+                                        <img src="<?php echo esc_url( $icon_url ); ?>" alt="<?php echo esc_attr( $s['rating_source'] ); ?>" class="img-fluid">
                                     <?php endif; ?>
                                     <strong><?php echo esc_html( $s['rating_value'] ); ?></strong> ★ |
                                     <?php echo esc_html( $s['rating_count'] ); ?> Reviews on <?php echo esc_html( $s['rating_source'] ); ?>
@@ -41,23 +42,59 @@ add_shortcode( 'hc_hero_carousel', function () {
                 </div>
             <?php endforeach; ?>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#hcHero" data-target="#hcHero" data-bs-slide="prev" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden sr-only">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#hcHero" data-target="#hcHero" data-bs-slide="next" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden sr-only">Next</span>
-        </button>
+        <button class="carousel-control-prev" type="button">‹</button>
+        <button class="carousel-control-next" type="button">›</button>
     </div>
     <style>
-        .hc-hero-carousel { position:relative; }
-        .hc-hero-carousel .hc-hero-item { min-height: 560px; background-size:cover; background-position:center; position:relative; }
+        .hc-hero-carousel { position:relative; overflow:hidden; }
+        .hc-hero-carousel .carousel-inner { position:relative; }
+        .hc-hero-carousel .hc-hero-item { min-height: 560px; background-size:cover; background-position:center; position:relative; display:none; }
+        .hc-hero-carousel .hc-hero-item.active { display:block; }
         .hc-hero-carousel .hc-hero-item:before { content:""; position:absolute; inset:0; background:rgba(20,20,30,0.55); }
-        .hc-hero-carousel .carousel-caption { position:absolute; left:0; right:0; bottom:auto; top:50%; transform:translateY(-50%); color:#fff; padding:0 20px; }
+        .hc-hero-carousel .carousel-caption { position:absolute; left:0; right:0; bottom:auto; top:50%; transform:translateY(-50%); color:#fff; padding:0 20px; text-align:center; z-index:2; }
         .hc-hero-carousel .carousel-caption h1, .hc-hero-carousel .carousel-caption h2 { color:#fff; font-size:48px; font-weight:700; line-height:1.2; max-width:900px; margin:0 auto 20px; text-transform:uppercase; letter-spacing:1.5px; }
-        .hc-hero-carousel .rating { display:inline-block; background:rgba(255,255,255,.12); padding:10px 20px; border-radius:2px; backdrop-filter:blur(6px); }
+        .hc-hero-carousel .rating { display:inline-block; background:rgba(255,255,255,.12); padding:10px 20px; border-radius:2px; }
         .hc-hero-carousel .rating img { width:24px; height:24px; vertical-align:middle; margin-right:8px; }
+        .hc-hero-carousel .carousel-control-prev,
+        .hc-hero-carousel .carousel-control-next {
+            position:absolute; top:50%; transform:translateY(-50%);
+            width:50px; height:50px; background:rgba(0,0,0,.4);
+            border:none; color:#fff; font-size:30px; cursor:pointer; z-index:3;
+        }
+        .hc-hero-carousel .carousel-control-prev { left:20px; }
+        .hc-hero-carousel .carousel-control-next { right:20px; }
+        .hc-hero-carousel .carousel-indicators {
+            position:absolute; bottom:30px; left:0; right:0; z-index:3;
+            display:flex; justify-content:center; gap:8px; padding:0; margin:0; list-style:none;
+        }
+        .hc-hero-carousel .carousel-indicators li {
+            width:30px; height:3px; background:rgba(255,255,255,.4); cursor:pointer; transition:background .3s;
+        }
+        .hc-hero-carousel .carousel-indicators li.active { background:#fff; }
         @media (max-width:768px){.hc-hero-carousel .carousel-caption h1, .hc-hero-carousel .carousel-caption h2{font-size:28px;}}
     </style>
+    <script>
+    (function(){
+        var root = document.getElementById('hcHero'); if (!root) return;
+        var items = root.querySelectorAll('.hc-hero-item');
+        var dots  = root.querySelectorAll('.carousel-indicators li');
+        var idx = 0, timer;
+        function show(i){
+            items.forEach(function(el){ el.classList.remove('active'); });
+            dots.forEach(function(el){ el.classList.remove('active'); });
+            items[i].classList.add('active');
+            if (dots[i]) dots[i].classList.add('active');
+            idx = i;
+        }
+        function next(){ show((idx + 1) % items.length); }
+        function prev(){ show((idx - 1 + items.length) % items.length); }
+        root.querySelector('.carousel-control-next').addEventListener('click', next);
+        root.querySelector('.carousel-control-prev').addEventListener('click', prev);
+        dots.forEach(function(d, i){ d.addEventListener('click', function(){ show(i); resetTimer(); }); });
+        function resetTimer(){ clearInterval(timer); timer = setInterval(next, 6000); }
+        resetTimer();
+    })();
+    </script>
     <?php
     return ob_get_clean();
 } );
@@ -66,15 +103,16 @@ add_shortcode( 'hc_hero_carousel', function () {
  * [hc_facility_icons] — 6-icon "Why Choose Us" strip.
  */
 add_shortcode( 'hc_facility_icons', function () {
-    $rows = get_field( 'facility_icons', 'option' );
-    if ( ! $rows ) return '';
+    $rows = hc_get( 'facility_icons' );
+    if ( ! is_array( $rows ) || ! $rows ) return '';
 
     ob_start(); ?>
     <div class="hc-facility-icons" style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;text-align:center;">
-        <?php foreach ( $rows as $r ) : ?>
+        <?php foreach ( $rows as $r ) :
+            $icon_url = ! empty( $r['icon'] ) ? hc_image_url( $r['icon'] ) : ''; ?>
             <div class="hc-fac">
-                <?php if ( ! empty( $r['icon']['url'] ) ) : ?>
-                    <img src="<?php echo esc_url( $r['icon']['url'] ); ?>" alt="<?php echo esc_attr( $r['label'] ); ?>" style="height:60px;width:auto;margin:0 auto 10px;">
+                <?php if ( $icon_url ) : ?>
+                    <img src="<?php echo esc_url( $icon_url ); ?>" alt="<?php echo esc_attr( $r['label'] ); ?>" style="height:60px;width:auto;margin:0 auto 10px;">
                 <?php endif; ?>
                 <h6 style="font-size:14px;font-weight:600;color:#14141e;text-transform:uppercase;letter-spacing:.5px;"><?php echo esc_html( $r['label'] ); ?></h6>
             </div>
@@ -87,14 +125,14 @@ add_shortcode( 'hc_facility_icons', function () {
 
 /**
  * [hc_category_cards] — 4 image-cards for Rooms/Restaurant/Banquet Hall/Board Room.
+ * Uses static theme assets.
  */
 add_shortcode( 'hc_category_cards', function () {
-    // Try to import the home category images at render-time as a fallback
     $cards = array(
-        array( 'label' => 'Rooms',        'url' => '/rooms/',            'src' => 'images/home/room.webp' ),
-        array( 'label' => 'Restaurant',   'url' => '/restaurant/',       'src' => 'images/home/restaurent.webp' ),
-        array( 'label' => 'Banquet Hall', 'url' => '/banquet-hall/',     'src' => 'images/home/banquet-hall.webp' ),
-        array( 'label' => 'Board Room',   'url' => '/conference-room/',  'src' => 'images/home/conference-room.webp' ),
+        array( 'label' => 'Rooms',        'url' => home_url( '/rooms/' ),            'src' => 'images/home/room.webp' ),
+        array( 'label' => 'Restaurant',   'url' => home_url( '/restaurant/' ),       'src' => 'images/home/restaurent.webp' ),
+        array( 'label' => 'Banquet Hall', 'url' => home_url( '/banquet-hall/' ),     'src' => 'images/home/banquet-hall.webp' ),
+        array( 'label' => 'Board Room',   'url' => home_url( '/conference-room/' ),  'src' => 'images/home/conference-room.webp' ),
     );
 
     ob_start(); ?>
@@ -118,12 +156,12 @@ add_shortcode( 'hc_category_cards', function () {
 } );
 
 /**
- * [hc_gallery_grid] — filterable gallery grid (categories: room/reception/restaurent/hall/corridor).
+ * [hc_gallery_grid] — filterable gallery grid.
  */
 add_shortcode( 'hc_gallery_grid', function ( $atts ) {
     $atts = shortcode_atts( array( 'filters' => 'yes', 'columns' => 3 ), $atts );
-    $items = get_field( 'gallery', 'option' );
-    if ( ! $items ) return '';
+    $items = hc_get( 'gallery' );
+    if ( ! is_array( $items ) || ! $items ) return '';
 
     $cats = array( 'room' => 'Room', 'reception' => 'Reception', 'restaurent' => 'Restaurant', 'hall' => 'Banquet Hall', 'corridor' => 'Corridor' );
 
@@ -140,15 +178,17 @@ add_shortcode( 'hc_gallery_grid', function ( $atts ) {
 
         <div class="hc-gallery-grid" style="display:grid;grid-template-columns:repeat(<?php echo intval( $atts['columns'] ); ?>,1fr);gap:14px;">
             <?php foreach ( $items as $g ) :
-                if ( empty( $g['image']['url'] ) ) continue; ?>
-                <a class="hc-gallery-item" data-cat="<?php echo esc_attr( $g['category'] ); ?>" href="<?php echo esc_url( $g['image']['url'] ); ?>" data-lightbox="hc-gallery">
-                    <img src="<?php echo esc_url( $g['image']['url'] ); ?>" alt="<?php echo esc_attr( $g['image']['alt'] ?: 'Gallery image' ); ?>" style="width:100%;height:260px;object-fit:cover;display:block;">
+                $url = hc_image_url( $g['image'] ?? 0, 'large' );
+                if ( ! $url ) continue; ?>
+                <a class="hc-gallery-item" data-cat="<?php echo esc_attr( $g['category'] ?? '' ); ?>" href="<?php echo esc_url( $url ); ?>" target="_blank">
+                    <img src="<?php echo esc_url( $url ); ?>" alt="" style="width:100%;height:260px;object-fit:cover;display:block;">
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
     <style>
-        .hc-gallery-filters .hc-filter { color:#777; text-transform:uppercase; font-size:13px; letter-spacing:1px; padding-bottom:4px; border-bottom:2px solid transparent; }
+        .hc-gallery-filters { list-style:none; }
+        .hc-gallery-filters .hc-filter { color:#777; text-transform:uppercase; font-size:13px; letter-spacing:1px; padding-bottom:4px; border-bottom:2px solid transparent; text-decoration:none; }
         .hc-gallery-filters .hc-filter.is-active { color:#D81418; border-bottom-color:#D81418; }
         .hc-gallery-item { display:block; overflow:hidden; }
         .hc-gallery-item img { transition:transform .5s ease; }
@@ -178,18 +218,19 @@ add_shortcode( 'hc_gallery_grid', function ( $atts ) {
 } );
 
 /**
- * [hc_gallery_slider] — owl-style horizontal slider for the home gallery section.
+ * [hc_gallery_slider] — horizontal slider for the home gallery section.
  */
 add_shortcode( 'hc_gallery_slider', function () {
-    $items = get_field( 'gallery', 'option' );
-    if ( ! $items ) return '';
+    $items = hc_get( 'gallery' );
+    if ( ! is_array( $items ) || ! $items ) return '';
 
     ob_start(); ?>
     <div class="hc-gallery-slider" style="display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;padding-bottom:10px;">
         <?php foreach ( $items as $g ) :
-            if ( empty( $g['image']['url'] ) ) continue; ?>
-            <a href="<?php echo esc_url( $g['image']['url'] ); ?>" data-lightbox="hc-home-gallery" style="flex:0 0 300px;scroll-snap-align:start;">
-                <img src="<?php echo esc_url( $g['image']['url'] ); ?>" alt="" style="width:300px;height:220px;object-fit:cover;display:block;">
+            $url = hc_image_url( $g['image'] ?? 0, 'large' );
+            if ( ! $url ) continue; ?>
+            <a href="<?php echo esc_url( $url ); ?>" target="_blank" style="flex:0 0 300px;scroll-snap-align:start;">
+                <img src="<?php echo esc_url( $url ); ?>" alt="" style="width:300px;height:220px;object-fit:cover;display:block;">
             </a>
         <?php endforeach; ?>
     </div>
@@ -202,8 +243,8 @@ add_shortcode( 'hc_gallery_slider', function () {
  * [hc_testimonials] — 3-column reviews block.
  */
 add_shortcode( 'hc_testimonials', function () {
-    $rows = get_field( 'testimonials', 'option' );
-    if ( ! $rows ) return '';
+    $rows = hc_get( 'testimonials' );
+    if ( ! is_array( $rows ) || ! $rows ) return '';
 
     ob_start(); ?>
     <div class="hc-testimonials" style="display:grid;grid-template-columns:repeat(<?php echo min( 3, count( $rows ) ); ?>,1fr);gap:30px;">
@@ -222,17 +263,19 @@ add_shortcode( 'hc_testimonials', function () {
 } );
 
 /**
- * [hc_awards] — slider/grid of certificates.
+ * [hc_awards] — slider/grid of certificates (stored as attachment IDs).
  */
 add_shortcode( 'hc_awards', function () {
-    $awards = get_field( 'awards', 'option' );
-    if ( ! $awards ) return '';
+    $awards = hc_get( 'awards' );
+    if ( ! is_array( $awards ) || ! $awards ) return '';
 
     ob_start(); ?>
     <div class="hc-awards-slider" style="display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;padding-bottom:10px;">
-        <?php foreach ( $awards as $a ) : ?>
-            <a href="<?php echo esc_url( $a['url'] ); ?>" data-lightbox="hc-awards" style="flex:0 0 220px;scroll-snap-align:start;">
-                <img src="<?php echo esc_url( $a['url'] ); ?>" alt="<?php echo esc_attr( $a['alt'] ?: 'Award' ); ?>" style="width:220px;height:300px;object-fit:contain;background:#fff;padding:12px;border:1px solid #eee;display:block;">
+        <?php foreach ( $awards as $att_id ) :
+            $url = hc_image_url( $att_id, 'large' );
+            if ( ! $url ) continue; ?>
+            <a href="<?php echo esc_url( $url ); ?>" target="_blank" style="flex:0 0 220px;scroll-snap-align:start;">
+                <img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( hc_image_alt( $att_id, 'Award' ) ); ?>" style="width:220px;height:300px;object-fit:contain;background:#fff;padding:12px;border:1px solid #eee;display:block;">
             </a>
         <?php endforeach; ?>
     </div>
@@ -241,26 +284,26 @@ add_shortcode( 'hc_awards', function () {
 } );
 
 /**
- * [hc_contact_info] — phone/email/address block (used in contact page + footer).
+ * [hc_contact_info] — phone/email/address block.
  */
 add_shortcode( 'hc_contact_info', function ( $atts ) {
     $atts = shortcode_atts( array( 'style' => 'light' ), $atts );
-    $phones  = get_field( 'phones', 'option' );
-    $emails  = get_field( 'emails', 'option' );
-    $address = get_field( 'address', 'option' );
+    $phones  = hc_get( 'phones' );
+    $emails  = hc_get( 'emails' );
+    $address = hc_get( 'address' );
 
     ob_start(); ?>
     <div class="hc-contact-info hc-contact-<?php echo esc_attr( $atts['style'] ); ?>">
-        <?php if ( $phones ) : ?>
+        <?php if ( is_array( $phones ) && $phones ) : ?>
             <div class="hc-ci-block"><h6>Phone</h6>
                 <?php foreach ( $phones as $p ) : ?>
                     <p><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $p['value'] ) ); ?>"><?php echo esc_html( $p['value'] ); ?></a>
-                        <?php if ( $p['label'] ) : ?><small style="opacity:.6;"> — <?php echo esc_html( $p['label'] ); ?></small><?php endif; ?>
+                        <?php if ( ! empty( $p['label'] ) ) : ?><small style="opacity:.6;"> — <?php echo esc_html( $p['label'] ); ?></small><?php endif; ?>
                     </p>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        <?php if ( $emails ) : ?>
+        <?php if ( is_array( $emails ) && $emails ) : ?>
             <div class="hc-ci-block"><h6>Email</h6>
                 <?php foreach ( $emails as $e ) : ?>
                     <p><a href="mailto:<?php echo esc_attr( $e['value'] ); ?>"><?php echo esc_html( $e['value'] ); ?></a></p>
@@ -286,7 +329,7 @@ add_shortcode( 'hc_contact_info', function ( $atts ) {
  * [hc_map] — Google Maps iframe.
  */
 add_shortcode( 'hc_map', function () {
-    $url = get_field( 'map_url', 'option' );
+    $url = hc_get( 'map_url' );
     if ( ! $url ) return '';
     return '<div class="hc-map"><iframe src="' . esc_url( $url ) . '" width="100%" height="450" style="border:0;display:block;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
 } );
@@ -295,10 +338,12 @@ add_shortcode( 'hc_map', function () {
  * [hc_restaurant_hours]
  */
 add_shortcode( 'hc_restaurant_hours', function () {
-    $rows    = get_field( 'restaurant_hours', 'option' );
-    $qr      = get_field( 'restaurant_qr', 'option' );
-    $reserve = get_field( 'restaurant_reserve_url', 'option' );
-    if ( ! $rows ) return '';
+    $rows    = hc_get( 'restaurant_hours' );
+    $qr_id   = hc_get( 'restaurant_qr' );
+    $reserve = hc_get( 'restaurant_reserve_url' );
+    if ( ! is_array( $rows ) || ! $rows ) return '';
+
+    $qr_url = $qr_id ? hc_image_url( $qr_id ) : '';
 
     ob_start(); ?>
     <div class="hc-rest-hours" style="background:#f8f8f8;padding:30px;">
@@ -314,9 +359,9 @@ add_shortcode( 'hc_restaurant_hours', function () {
         <?php if ( $reserve ) : ?>
             <a href="<?php echo esc_url( $reserve ); ?>" target="_blank" rel="noopener noreferrer" class="hc-btn-primary" style="display:inline-block;margin-top:20px;">Reserve a Table</a>
         <?php endif; ?>
-        <?php if ( ! empty( $qr['url'] ) ) : ?>
+        <?php if ( $qr_url ) : ?>
             <h5 style="margin-top:30px;">Scan QR to View Menu</h5>
-            <img src="<?php echo esc_url( $qr['url'] ); ?>" alt="Menu QR" style="max-width:180px;display:block;margin-top:10px;">
+            <img src="<?php echo esc_url( $qr_url ); ?>" alt="Menu QR" style="max-width:180px;display:block;margin-top:10px;">
         <?php endif; ?>
     </div>
     <?php
@@ -328,17 +373,18 @@ add_shortcode( 'hc_restaurant_hours', function () {
  */
 add_shortcode( 'hc_category_grid', function ( $atts ) {
     $atts = shortcode_atts( array( 'type' => 'banquet', 'columns' => 3 ), $atts );
-    $field = $atts['type'] === 'conference' ? 'conference_categories'
-           : ( $atts['type'] === 'cuisine'  ? 'restaurant_cuisines'  : 'banquet_categories' );
-    $rows = get_field( $field, 'option' );
-    if ( ! $rows ) return '';
+    $key = $atts['type'] === 'conference' ? 'conference_categories'
+         : ( $atts['type'] === 'cuisine'  ? 'restaurant_cuisines'  : 'banquet_categories' );
+    $rows = hc_get( $key );
+    if ( ! is_array( $rows ) || ! $rows ) return '';
 
     ob_start(); ?>
     <div class="hc-cat-grid" style="display:grid;grid-template-columns:repeat(<?php echo intval( $atts['columns'] ); ?>,1fr);gap:20px;">
-        <?php foreach ( $rows as $r ) : ?>
+        <?php foreach ( $rows as $r ) :
+            $url = ! empty( $r['image'] ) ? hc_image_url( $r['image'], 'large' ) : ''; ?>
             <div class="hc-cat-tile" style="position:relative;overflow:hidden;">
-                <?php if ( ! empty( $r['image']['url'] ) ) : ?>
-                    <img src="<?php echo esc_url( $r['image']['url'] ); ?>" alt="<?php echo esc_attr( $r['label'] ); ?>" style="width:100%;height:240px;object-fit:cover;display:block;">
+                <?php if ( $url ) : ?>
+                    <img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( $r['label'] ); ?>" style="width:100%;height:240px;object-fit:cover;display:block;">
                 <?php endif; ?>
                 <div style="position:absolute;inset:0;background:linear-gradient(transparent 50%, rgba(0,0,0,.7));display:flex;align-items:flex-end;padding:18px;">
                     <h5 style="color:#fff;margin:0;font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;"><?php echo esc_html( $r['label'] ); ?></h5>
@@ -352,7 +398,7 @@ add_shortcode( 'hc_category_grid', function ( $atts ) {
 } );
 
 /**
- * [hc_counters] — about-us counters block (50+ Rooms, 70+ Staffs, 100+ Dishes).
+ * [hc_counters] — about-us counters block.
  */
 add_shortcode( 'hc_counters', function () {
     $items = array(
@@ -375,14 +421,14 @@ add_shortcode( 'hc_counters', function () {
 } );
 
 /**
- * [hc_footer_widgets] — full 4-column footer block matching component/footer.php.
+ * [hc_footer_widgets] — full 4-column footer block.
  */
 add_shortcode( 'hc_footer_widgets', function () {
-    $phones  = get_field( 'phones', 'option' );
-    $emails  = get_field( 'emails', 'option' );
-    $address = get_field( 'address', 'option' );
-    $fb      = get_field( 'facebook_url', 'option' );
-    $ig      = get_field( 'instagram_url', 'option' );
+    $phones  = hc_get( 'phones' );
+    $emails  = hc_get( 'emails' );
+    $address = hc_get( 'address' );
+    $fb      = hc_get( 'facebook_url' );
+    $ig      = hc_get( 'instagram_url' );
 
     ob_start(); ?>
     <div class="hc-footer-widgets" style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1.3fr;gap:40px;padding:60px 0;">
@@ -400,39 +446,37 @@ add_shortcode( 'hc_footer_widgets', function () {
         <div>
             <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Rooms</h3>
             <ul style="list-style:none;padding:0;margin:0;">
-                <li><a href="/room/executive-room/">Executive</a></li>
-                <li><a href="/room/premium-room/">Premium</a></li>
-                <li><a href="/room/presidential-room/">Presidential</a></li>
-                <li><a href="/room/luxury-room/">Luxury</a></li>
-                <li><a href="/room/deluxe-room/">Deluxe</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/room/executive-room/' ) ); ?>">Executive</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/room/premium-room/' ) ); ?>">Premium</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/room/presidential-room/' ) ); ?>">Presidential</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/room/luxury-room/' ) ); ?>">Luxury</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/room/deluxe-room/' ) ); ?>">Deluxe</a></li>
             </ul>
         </div>
         <div>
             <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Quick Links</h3>
             <ul style="list-style:none;padding:0;margin:0;">
-                <li><a href="/about-us/">About Us</a></li>
-                <li><a href="/news-blogs/">News &amp; Blogs</a></li>
-                <li><a href="/faq/">FAQ's</a></li>
-                <li><a href="/gallery/">Gallery</a></li>
-                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/about-us/' ) ); ?>">About Us</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/news-blogs/' ) ); ?>">News &amp; Blogs</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/faq/' ) ); ?>">FAQ's</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/gallery/' ) ); ?>">Gallery</a></li>
+                <li><a href="<?php echo esc_url( home_url( '/contact-us/' ) ); ?>">Contact Us</a></li>
             </ul>
         </div>
         <div>
             <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Contact Us</h3>
-            <?php if ( $phones ) : ?>
-                <?php foreach ( $phones as $p ) : ?>
-                    <p style="margin:4px 0;"><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $p['value'] ) ); ?>"><?php echo esc_html( $p['value'] ); ?></a></p>
-                <?php endforeach; ?>
-            <?php endif; ?>
-            <?php if ( $emails ) : foreach ( $emails as $e ) : ?>
+            <?php if ( is_array( $phones ) ) foreach ( $phones as $p ) : ?>
+                <p style="margin:4px 0;"><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $p['value'] ) ); ?>"><?php echo esc_html( $p['value'] ); ?></a></p>
+            <?php endforeach; ?>
+            <?php if ( is_array( $emails ) ) foreach ( $emails as $e ) : ?>
                 <p style="margin:4px 0;"><a href="mailto:<?php echo esc_attr( $e['value'] ); ?>"><?php echo esc_html( $e['value'] ); ?></a></p>
-            <?php endforeach; endif; ?>
+            <?php endforeach; ?>
             <?php if ( $address ) : ?><p style="margin-top:10px;color:#ccc;"><?php echo esc_html( $address ); ?></p><?php endif; ?>
         </div>
     </div>
     <style>
         .hc-footer-widgets ul li { padding:4px 0; }
-        .hc-footer-widgets ul li a, .hc-footer-widgets p a { color:#ccc; }
+        .hc-footer-widgets ul li a, .hc-footer-widgets p a { color:#ccc; text-decoration:none; }
         .hc-footer-widgets ul li a:hover, .hc-footer-widgets p a:hover { color:#D81418; }
         @media(max-width:768px){.hc-footer-widgets{grid-template-columns:1fr 1fr !important;}}
     </style>
