@@ -1,0 +1,92 @@
+# Zero-setup local WordPress for Hotel Cosmopolitan.
+#
+# Usage:
+#   1. cd wordpress/docker
+#   2. Place your Divi.zip into wordpress/docker/uploads/ (rename to exactly Divi.zip)
+#   3. Place your advanced-custom-fields-pro.zip into wordpress/docker/uploads/ (rename to acf-pro.zip)
+#   4. From repo root: bash wordpress/scripts/copy-assets.sh
+#   5. cd wordpress/docker && docker compose up -d
+#   6. Wait ~60 seconds, then open http://localhost:8080
+#
+# Admin login (auto-created):
+#   user: admin
+#   pass: admin
+#
+# Everything else (Divi install, child theme, plugins, pages, menu, seed data) is
+# automated by the installer service. See setup.sh in this folder.
+
+services:
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: hc_wp
+      MARIADB_USER: hc_wp
+      MARIADB_PASSWORD: hc_wp
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.5-php8.2-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: hc_wp
+      WORDPRESS_DB_USER: hc_wp
+      WORDPRESS_DB_PASSWORD: hc_wp
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - wp_data:/var/www/html
+      # Mount our child theme + plugins as bind volumes so edits to repo files
+      # show up immediately in the running container.
+      - ../wp-content/themes/hotelcosmopolitan-child:/var/www/html/wp-content/themes/hotelcosmopolitan-child
+      - ../wp-content/plugins/hc-rooms:/var/www/html/wp-content/plugins/hc-rooms
+      - ../wp-content/plugins/hc-blogs:/var/www/html/wp-content/plugins/hc-blogs
+      - ../wp-content/plugins/hc-inquiries:/var/www/html/wp-content/plugins/hc-inquiries
+      # User-provided zips (Divi, ACF Pro) — used by the installer
+      - ./uploads:/uploads:ro
+
+  installer:
+    image: wordpress:cli-php8.2
+    depends_on:
+      wordpress:
+        condition: service_started
+      db:
+        condition: service_healthy
+    user: "33:33"   # www-data — matches WP container
+    volumes:
+      - wp_data:/var/www/html
+      - ../wp-content/themes/hotelcosmopolitan-child:/var/www/html/wp-content/themes/hotelcosmopolitan-child
+      - ../wp-content/plugins/hc-rooms:/var/www/html/wp-content/plugins/hc-rooms
+      - ../wp-content/plugins/hc-blogs:/var/www/html/wp-content/plugins/hc-blogs
+      - ../wp-content/plugins/hc-inquiries:/var/www/html/wp-content/plugins/hc-inquiries
+      - ./uploads:/uploads:ro
+      - ./setup.sh:/setup.sh:ro
+    entrypoint: /bin/sh -lc "while ! mysqladmin ping -h db -u hc_wp -phc_wp --silent; do sleep 2; done && sleep 5 && sh /setup.sh"
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: hc_wp
+      PMA_PASSWORD: hc_wp
+
+volumes:
+  db_data:
+  wp_data:

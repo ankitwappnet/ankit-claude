@@ -1,0 +1,15 @@
+# Copied static-site assets — produced by wordpress/scripts/copy-assets.sh
+# Kept out of the repo because they already exist under public_html/images/ and would duplicate ~82MB.
+wordpress/wp-content/themes/hotelcosmopolitan-child/assets/images/
+wordpress/wp-content/themes/hotelcosmopolitan-child/assets/fonts/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# WP / PHP runtime
+*.log
+error_log
