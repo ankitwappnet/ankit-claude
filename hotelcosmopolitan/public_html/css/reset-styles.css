@@ -1,0 +1,142 @@
+/* * {
+    margin:  0;
+    padding: 0;
+    border: none;
+} */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    line-height: inherit;
+}
+
+p {
+    margin-bottom: 20px;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+code {
+    white-space: normal;
+}
+
+.clear {
+    clear: both
+}
+
+/* Align */
+
+.alignleft {
+    float: left;
+}
+
+.alignright {
+    float: right;
+}
+
+.aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Image */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* List */
+ul,
+ol {
+    margin-bottom: 10px;
+    margin-left: 25px;
+}
+
+ol {
+    list-style: decimal;
+    margin-left: 15px;
+}
+
+ul.square {
+    list-style: square outside;
+}
+
+ul.circle {
+    list-style: circle outside;
+}
+
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+    margin: 4px 0 5px 30px;
+}
+
+ul ul li,
+ul ol li,
+ol ol li,
+ol ul li {
+    margin-bottom: 6px;
+}
+
+/* Table */
+th,
+td {
+    padding: 4px 6px;
+}
+
+table,
+td,
+tr {
+    border: 1px #ccc solid;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+caption,
+th,
+td {
+    font-weight: normal;
+    text-align: left;
+}
+
+th {
+    border-width: 0 1px 1px 0;
+    font-weight: bold;
+}
+
+td {
+    border-width: 0 1px 1px 0;
+}
+
+dd {
+    margin-bottom: 24px;
+}
+
+a:hover,
+a:focus {
+    text-decoration: none;
+}
+
+
+input,
+button {
+    outline: 0 !important;
+}

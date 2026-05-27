@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:100,300,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto:100,300,300i,400,400i,500,500i,700,700i,900,900i');
+@import url('https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i,900,900i');
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mr+Dafoe&family=Roboto:wght@100;300;400;500;700;900&family=Satisfy&display=swap');
+@import url('https://cdn-uicons.flaticon.com/uicons-solid-straight/css/uicons-solid-straight.css');
+@import url("https://site-assets.fontawesome.com/releases/v6.2.1/css/all.css");
+@import url("https://site-assets.fontawesome.com/releases/v6.2.1/css/sharp-solid.css");
+
+/* Library CSS */
+@import "libs/bootstrap/bootstrap.css";
+@import "libs/awesome/font-awesome.css";
+@import "libs/ionicons/ionicons.css";
+@import "libs/owl-carousel/owl.carousel.css";
+@import "libs/magnific-popup/main.css";
+@import "libs/flexslider/flexslider.css";
+@import "libs/camera/camera.css";
+
+@import "reset-styles.css";
+@import "general.css";
+
+@import "header.css";
+@import "pages.css";
+@import "blog.css";
+@import "shop.css";
+@import "sidebar.css";
+@import "facilities.css";
+@import "rooms.css";
+@import "home.css";
+@import "footer.css";
+@import "responsive.css";
+@import "star.css";
+@import "bookingform.css";
+
+body {
+    scroll-behavior: smooth;
+}
+
+#blogs a {
+    color: #d81418;
+}
+
+.cus-border-left {
+    border-left: 5px solid #f9b806;
+    padding-left: 10px;
+    height: 1;
+}
+
+.border-line {
+    padding: 0;
+    border: none;
+    border-top: medium double #D81418;
+    color: #D81418;
+    text-align: center;
+    /* border: 1px outset #D81418; */
+}
+
+.border-line:after {
+    content: "§";
+    display: inline-block;
+    position: relative;
+    top: -0.7em;
+    font-size: 1.5em;
+    padding: 0 0.25em;
+    background: #fff;
+}
+
+.card-title {
+    margin: 0px !important;
+    font-size: 17px !important;
+}
+
+.description {
+    text-align: justify;
+}
+
+.blog-title {
+    font-size: 29px;
+    float: left;
+}
