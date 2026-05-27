@@ -14,9 +14,12 @@ define( 'HC_ROOMS_VERSION', '1.0.0' );
 define( 'HC_ROOMS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HC_ROOMS_URL', plugin_dir_url( __FILE__ ) );
 
+require_once HC_ROOMS_DIR . 'includes/helpers.php';
 require_once HC_ROOMS_DIR . 'includes/cpt.php';
 require_once HC_ROOMS_DIR . 'includes/acf-fields.php';
+require_once HC_ROOMS_DIR . 'includes/site-options.php';
 require_once HC_ROOMS_DIR . 'includes/shortcodes.php';
+require_once HC_ROOMS_DIR . 'includes/site-shortcodes.php';
 require_once HC_ROOMS_DIR . 'includes/seed-data.php';
 
 register_activation_hook( __FILE__, function () {

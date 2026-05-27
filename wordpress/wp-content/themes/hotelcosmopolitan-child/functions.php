@@ -124,6 +124,34 @@ add_filter( 'wp_nav_menu_items', function ( $items, $args ) {
 /**
  * Helper: render the standard page-title block. Use from Divi via shortcode [hc_page_title].
  */
+/**
+ * Inject the custom footer widget area into the Divi footer.
+ * Mirrors component/footer.php from the original site (logo, rooms menu, quick links, contact).
+ *
+ * Disable via Customizer or by setting the `hc_render_custom_footer` filter to false.
+ */
+add_action( 'et_after_main_content', function () {
+    if ( ! apply_filters( 'hc_render_custom_footer', true ) ) return;
+    if ( ! shortcode_exists( 'hc_footer_widgets' ) ) return;
+    echo '<div class="hc-custom-footer-widgets" style="background:#14141e;color:#ccc;"><div style="max-width:1200px;margin:0 auto;padding:0 20px;">'
+        . do_shortcode( '[hc_footer_widgets]' )
+        . '</div></div>';
+}, 5 );
+
+/**
+ * Append legal links to the Divi copyright row.
+ */
+add_filter( 'et_get_safe_localization', function ( $text ) {
+    if ( false !== strpos( $text, 'designed by' ) ) {
+        $extras = ' | <a href="' . esc_url( home_url( '/terms-condition/' ) ) . '">Terms &amp; Conditions</a>'
+                . ' | <a href="' . esc_url( home_url( '/privacy-policy/' ) ) . '">Privacy Policy</a>'
+                . ' | <a href="' . esc_url( home_url( '/reservation-policy/' ) ) . '">Booking Policy</a>'
+                . ' | <a href="' . esc_url( home_url( '/cancellation-policy/' ) ) . '">Cancellation Policy</a>';
+        $text .= $extras;
+    }
+    return $text;
+} );
+
 add_shortcode( 'hc_page_title', function ( $atts ) {
     $atts = shortcode_atts( array(
         'title'      => get_the_title(),

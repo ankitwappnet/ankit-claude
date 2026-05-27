@@ -15,19 +15,26 @@ wordpress/
 └── divi-layouts/                                       ← Divi layout JSONs (Home, Rooms archive, Single Room template)
 ```
 
-## What's dynamic vs. still to do (Phase 1 scope)
+## What's dynamic vs. still to do
 
 | Area | Status |
 |---|---|
-| Rooms (Executive / Premium / Presidential / Luxury / Deluxe) | ✅ CPT + ACF fields + auto-seed of 5 rooms |
+| Rooms (Executive / Premium / Presidential / Luxury / Deluxe) | ✅ CPT + ACF fields + **auto-seed of 5 rooms with images imported into Media Library** |
 | Blogs / news-blogs | ✅ CPT + grid shortcode |
 | Inquiry & booking forms | ✅ Custom plugin, admin UI, email + DB |
-| Header / footer / global styling | ✅ Child theme CSS matches original red/Poppins look |
-| Home page layout | ✅ Importable Divi JSON |
+| Site Content (Hero slides, Facility icons, Gallery, Testimonials, Awards, Contact, Restaurant hours, Banquet/Conference/Cuisine categories) | ✅ **ACF Options page + full seed of original content** |
+| Header / footer / global styling | ✅ Child theme CSS + custom footer widget area |
+| Home page layout | ✅ Importable Divi JSON (5 sections matching original) |
+| About Us layout | ✅ Importable Divi JSON |
+| Contact Us layout | ✅ Importable Divi JSON (form + contact info + map) |
+| Gallery layout | ✅ Importable Divi JSON (filterable grid) |
+| Restaurant layout | ✅ Importable Divi JSON (gallery + cuisines + hours sidebar) |
+| Banquet Hall layout | ✅ Importable Divi JSON (with event categories) |
+| Conference Room layout | ✅ Importable Divi JSON (with use-case categories) |
+| Facilities index | ✅ Importable Divi JSON |
 | Rooms archive page | ✅ Importable Divi JSON |
 | Single Room template | ✅ Theme Builder template JSON |
-| **Phase 2** — About, Contact, Gallery, Restaurant, Banquet Hall, Conference Room layouts | ⬜ Not yet (next PR) |
-| **Phase 3** — 30+ SEO landing pages (3-star/4-star variations) | ⬜ Next PR; recommend single "landing" template + CSV import |
+| **Phase 3 backlog** — FAQ, policies, single Blog template, 30+ SEO landing pages | ⬜ Future PR |
 
 ## Prerequisites on hosting
 
@@ -78,13 +85,43 @@ On activation:
 - `hc-blogs` registers the **Blogs** menu.
 - `hc-inquiries` creates the `wp_hc_inquiries` table and adds the **Inquiries** menu.
 
+### 5b. Verify auto-seed completed
+
+On the next admin page-load after activating the plugins, the seeders run automatically:
+
+1. *Rooms → All Rooms* — should show **5 rooms** (Executive, Premium, Presidential, Luxury, Deluxe) with featured images and gallery images populated.
+2. *Site Content* (left-side menu) — should show **Gallery** (~22 images), **Testimonials** (3), **Awards** (10), **Facility Icons** (6), **Hero Slides** (5), **Banquet/Conference/Cuisine categories**, **Contact info** all pre-populated from the original site.
+3. *Media* — should show all the imported assets.
+
+If something is missing, check that `wordpress/wp-content/themes/hotelcosmopolitan-child/assets/images/` exists on the server (this is where the seeder reads from — created by `copy-assets.sh`).
+
+To re-seed (if needed): delete the `hc_rooms_seeded` and `hc_site_content_seeded` rows from `wp_options` and reload WP-Admin.
+
 ### 6. Import Divi layouts
 
-**Home page:**
-1. *WP-Admin → Pages → All Pages* — open the "Sample Page" or create a new page titled **Home**.
-2. Click "Use Divi Builder" → "Build From Scratch" → in the builder, click the gear/portability icon (top-right) → **Import** → upload `wordpress/divi-layouts/home-layout.json`.
-3. Save the page.
-4. *WP-Admin → Settings → Reading* → set **Your homepage displays** to "A static page" → Homepage = the page you just made.
+Create the pages first (*Pages → Add New*), then import each layout. For every page below:
+1. Create the page with the specified slug.
+2. Click "Use Divi Builder" → "Build From Scratch".
+3. In Divi Builder, click the gear/portability icon (top-right) → **Import** → upload the JSON file.
+4. Save.
+
+| Page Title | Slug | Import file |
+|---|---|---|
+| Home | (set as front page) | `home-layout.json` |
+| About Us | `about-us` | `about-us-layout.json` |
+| Contact Us | `contact-us` | `contact-us-layout.json` |
+| Gallery | `gallery` | `gallery-layout.json` |
+| Coriander Restaurant | `restaurant` | `restaurant-layout.json` |
+| Banquet Hall | `banquet-hall` | `banquet-hall-layout.json` |
+| Board Room | `conference-room` | `conference-room-layout.json` |
+| Facilities | `facilities` | `facilities-layout.json` |
+| Rooms | `rooms` | `rooms-archive-layout.json` |
+
+After importing **Home**: *Settings → Reading* → set **Your homepage displays** to "A static page" → Homepage = Home.
+
+**Token replacements:** A few layouts contain placeholders like `@@HC_THEME_URI@@` (theme URL) and `@@HC_RESTAURANT_GALLERY@@` (gallery IDs). Open each layout in Divi Builder and:
+- Replace `@@HC_THEME_URI@@` in image-src fields with your actual site URL prefix (e.g. `https://hotelcosmopolitan.in/wp-content/themes/hotelcosmopolitan-child`)
+- For `@@HC_RESTAURANT_GALLERY@@` (in `restaurant-layout.json`), the Divi gallery module — click the gallery icon, remove the placeholder, and pick the restaurant images from Media Library (they're already imported there).
 
 **Rooms archive:**
 1. Create a Page titled **Rooms** (slug `rooms`).
@@ -131,6 +168,7 @@ If outbound email is unreliable, install an SMTP plugin (e.g., FluentSMTP) and r
 
 ## Shortcodes reference
 
+### Rooms
 | Shortcode | Where to use |
 |---|---|
 | `[hc_rooms_grid columns="2"]` | Rooms archive, home page |
@@ -138,6 +176,33 @@ If outbound email is unreliable, install an SMTP plugin (e.g., FluentSMTP) and r
 | `[hc_room_gallery]` | Single room template |
 | `[hc_room_amenities]` | Single room template |
 | `[hc_room_booking]` | Single room template / sidebar |
+
+### Home page sections
+| Shortcode | Reads from |
+|---|---|
+| `[hc_hero_carousel]` | Site Content → Hero Slides |
+| `[hc_facility_icons]` | Site Content → Facility Icons |
+| `[hc_category_cards]` | Hard-coded 4-card grid (Rooms/Restaurant/Banquet/Board Room) |
+| `[hc_gallery_slider]` | Site Content → Gallery |
+| `[hc_testimonials]` | Site Content → Testimonials |
+| `[hc_awards]` | Site Content → Awards |
+| `[hc_counters]` | Hard-coded (50+ Rooms, 70+ Staff, 100+ Dishes) |
+
+### Page sections
+| Shortcode | Reads from |
+|---|---|
+| `[hc_gallery_grid filters="yes" columns="3"]` | Site Content → Gallery (filterable) |
+| `[hc_contact_info style="light"]` | Site Content → Contact tab |
+| `[hc_map]` | Site Content → Map URL |
+| `[hc_restaurant_hours]` | Site Content → Restaurant tab |
+| `[hc_category_grid type="banquet"]` | Site Content → Banquet categories |
+| `[hc_category_grid type="conference"]` | Site Content → Conference categories |
+| `[hc_category_grid type="cuisine"]` | Site Content → Restaurant cuisines |
+| `[hc_footer_widgets]` | Auto-injected above Divi footer |
+
+### Blogs / forms
+| Shortcode | Where to use |
+|---|---|
 | `[hc_blogs_grid limit="6" columns="3"]` | Home page, blogs archive |
 | `[hc_inquiry_form]` | Contact page |
 | `[hc_inquiry_form variant="booking"]` | Home, single room, booking page |
