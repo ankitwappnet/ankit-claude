@@ -2,6 +2,40 @@
 
 This package converts the existing static site at `public_html/` into a dynamic WordPress site using **Divi** as the parent theme.
 
+## 🚀 Zero-setup local install (Docker)
+
+If you have Docker Desktop installed, this is the fastest path:
+
+```bash
+# 1. Drop your licensed zips into wordpress/docker/uploads/
+#    (Divi.zip from Elegant Themes, acf-pro.zip from ACF — both renamed exactly)
+
+# 2. Copy original assets into the child theme (one-time)
+bash wordpress/scripts/copy-assets.sh
+
+# 3. Spin up the stack
+cd wordpress/docker
+docker compose up -d
+
+# 4. Wait ~60 seconds, then open:
+#    Site:        http://localhost:8080
+#    WP-Admin:    http://localhost:8080/wp-admin   (admin / admin)
+#    phpMyAdmin:  http://localhost:8081            (hc_wp / hc_wp)
+```
+
+The `installer` container automatically:
+- Installs WordPress core
+- Installs and activates Divi from your zip
+- Installs and activates ACF Pro (or falls back to free ACF)
+- Activates the child theme + 3 custom plugins
+- Runs all seeders: 5 rooms, ~150 media attachments, ACF Site Content, all pages, primary menu, permalinks, front page
+
+**To re-run the install:** `docker compose down -v && docker compose up -d` (wipes DB + uploads volumes).
+
+---
+
+## Manual install (existing WordPress, XAMPP, Local by Flywheel, production hosting)
+
 ## What's in this package
 
 ```
@@ -87,41 +121,44 @@ On activation:
 
 ### 5b. Verify auto-seed completed
 
-On the next admin page-load after activating the plugins, the seeders run automatically:
+On the next admin page-load after activating the plugins, the seeders run automatically and create:
 
-1. *Rooms → All Rooms* — should show **5 rooms** (Executive, Premium, Presidential, Luxury, Deluxe) with featured images and gallery images populated.
-2. *Site Content* (left-side menu) — should show **Gallery** (~22 images), **Testimonials** (3), **Awards** (10), **Facility Icons** (6), **Hero Slides** (5), **Banquet/Conference/Cuisine categories**, **Contact info** all pre-populated from the original site.
-3. *Media* — should show all the imported assets.
+1. **5 rooms** (Executive, Premium, Presidential, Luxury, Deluxe) with featured images + galleries — visit *WP-Admin → Rooms*
+2. **Site Content** (left-side menu): Gallery (~22 images), Testimonials (3), Awards (10), Facility Icons (6), Hero Slides (5), Banquet/Conference/Cuisine categories, Contact info — all pre-populated from the original site
+3. **9 main pages** (Home, About, Rooms, Restaurant, Banquet Hall, Board Room, Facilities, Gallery, Contact) with Divi layouts already imported
+4. **6 policy/static pages** (FAQ, Privacy Policy, Terms, Reservation Policy, Cancellation Policy, News & Blogs)
+5. **~36 SEO landing pages** (`3-star-hotel-in-ahmedabad`, `4-star-hotel-near-airport-in-ahmedabad`, `best-hotel-in-ahmedabad`, etc.) — each pre-populated with the original prose content + booking widget + rooms grid + original meta title/description stored for Yoast/RankMath
+6. **Primary Menu** built and assigned to the "Primary Menu" theme location
+7. **Front page** set to "Home"
+8. **Permalink structure** set to `/%postname%/`
 
-If something is missing, check that `wordpress/wp-content/themes/hotelcosmopolitan-child/assets/images/` exists on the server (this is where the seeder reads from — created by `copy-assets.sh`).
+If something is missing, check that `wordpress/wp-content/themes/hotelcosmopolitan-child/assets/images/` exists on the server (this is where the image seeder reads from — created by `copy-assets.sh`).
 
-To re-seed (if needed): delete the `hc_rooms_seeded` and `hc_site_content_seeded` rows from `wp_options` and reload WP-Admin.
+**WP-CLI commands** (alternative to admin-init seed trigger):
 
-### 6. Import Divi layouts
+```bash
+wp hc install   # run all seeders once
+wp hc reseed    # wipe flags and re-run (existing rooms/pages preserved)
+wp hc status    # show what's been seeded
+```
 
-Create the pages first (*Pages → Add New*), then import each layout. For every page below:
-1. Create the page with the specified slug.
-2. Click "Use Divi Builder" → "Build From Scratch".
-3. In Divi Builder, click the gear/portability icon (top-right) → **Import** → upload the JSON file.
-4. Save.
+To re-seed manually: delete the `hc_rooms_seeded`, `hc_site_content_seeded` and `hc_pages_seeded` rows from `wp_options` and reload WP-Admin.
 
-| Page Title | Slug | Import file |
-|---|---|---|
-| Home | (set as front page) | `home-layout.json` |
-| About Us | `about-us` | `about-us-layout.json` |
-| Contact Us | `contact-us` | `contact-us-layout.json` |
-| Gallery | `gallery` | `gallery-layout.json` |
-| Coriander Restaurant | `restaurant` | `restaurant-layout.json` |
-| Banquet Hall | `banquet-hall` | `banquet-hall-layout.json` |
-| Board Room | `conference-room` | `conference-room-layout.json` |
-| Facilities | `facilities` | `facilities-layout.json` |
-| Rooms | `rooms` | `rooms-archive-layout.json` |
+### 6. Layouts are auto-imported
 
-After importing **Home**: *Settings → Reading* → set **Your homepage displays** to "A static page" → Homepage = Home.
+The page seeder (step 5b above) already creates every page and embeds the matching Divi layout from `wp-content/plugins/hc-rooms/layouts/`. No manual import is required.
 
-**Token replacements:** A few layouts contain placeholders like `@@HC_THEME_URI@@` (theme URL) and `@@HC_RESTAURANT_GALLERY@@` (gallery IDs). Open each layout in Divi Builder and:
-- Replace `@@HC_THEME_URI@@` in image-src fields with your actual site URL prefix (e.g. `https://hotelcosmopolitan.in/wp-content/themes/hotelcosmopolitan-child`)
-- For `@@HC_RESTAURANT_GALLERY@@` (in `restaurant-layout.json`), the Divi gallery module — click the gallery icon, remove the placeholder, and pick the restaurant images from Media Library (they're already imported there).
+If you need to **re-import** or **manually import** a layout into a page later:
+1. Open the page in Divi Builder.
+2. Click the gear/portability icon (top-right) → **Import**.
+3. Upload the JSON file from `wordpress/divi-layouts/` (same files are also bundled inside the plugin at `wp-content/plugins/hc-rooms/layouts/`).
+
+**Single Room template (Theme Builder):**
+1. *Divi → Theme Builder* → **Add New Template** → assign to "All Rooms".
+2. Add Custom Body → Build → Import → `single-room-template.json`.
+
+**Single Blog template (Theme Builder):**
+1. Same flow → assign to "All HC Blogs" → import `single-blog-template.json`.
 
 **Rooms archive:**
 1. Create a Page titled **Rooms** (slug `rooms`).

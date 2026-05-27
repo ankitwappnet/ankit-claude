@@ -21,6 +21,8 @@ require_once HC_ROOMS_DIR . 'includes/site-options.php';
 require_once HC_ROOMS_DIR . 'includes/shortcodes.php';
 require_once HC_ROOMS_DIR . 'includes/site-shortcodes.php';
 require_once HC_ROOMS_DIR . 'includes/seed-data.php';
+require_once HC_ROOMS_DIR . 'includes/page-seeder.php';
+require_once HC_ROOMS_DIR . 'includes/wp-cli.php';
 
 register_activation_hook( __FILE__, function () {
     hc_rooms_register_cpt();
