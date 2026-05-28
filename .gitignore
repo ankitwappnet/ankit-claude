@@ -10,6 +10,10 @@ Thumbs.db
 .vscode/
 *.swp
 
+# WP Cache
+wp-content/et-cache/
+wp-content/uploads/cache/
+
 # WP / PHP runtime
 *.log
 error_log
