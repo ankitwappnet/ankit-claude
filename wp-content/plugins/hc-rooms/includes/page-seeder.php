@@ -19,7 +19,7 @@ add_action( 'admin_init', 'hc_pages_seed', 40 );
 
 function hc_pages_seed() {
 
-    if ( get_option( 'hc_pages_seeded_v5' ) ) return;
+    if ( get_option( 'hc_pages_seeded_v6' ) ) return;
 
     $created_ids = array();
 
@@ -98,11 +98,12 @@ function hc_pages_seed() {
 
     // ----- 7. Flush rewrites + mark done -----
     flush_rewrite_rules();
-    update_option( 'hc_pages_seeded_v5', 1 );
+    update_option( 'hc_pages_seeded_v6', 1 );
     delete_option( 'hc_pages_seeded' );
     delete_option( 'hc_pages_seeded_v2' );
     delete_option( 'hc_pages_seeded_v3' );
     delete_option( 'hc_pages_seeded_v4' );
+    delete_option( 'hc_pages_seeded_v5' );
 }
 
 /**
@@ -195,10 +196,12 @@ function hc_build_about_page() {
 }
 
 function hc_build_rooms_archive_page() {
-    // Use the same per-room native Divi blurb stack as the home page so
-    // every room card on /rooms/ is also clickable / editable in Divi Builder.
+    // 3-column table-style layout matching the original site:
+    // Image+Title | Amenities (2-col) | Booking options. Each column is a
+    // native Divi module so the client can click any image, title, amenity
+    // list or button in Divi Builder.
     return hc_divi_page_title( 'Rooms' )
-         . hc_divi_rooms_section( '', 'Choose Your Room' );
+         . hc_divi_rooms_archive_layout();
 }
 
 function hc_build_restaurant_page() {

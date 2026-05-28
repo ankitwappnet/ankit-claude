@@ -18,7 +18,10 @@ function hc_rooms_register_cpt() {
         ),
         'public'              => true,
         'show_in_rest'        => true,
-        'has_archive'         => 'rooms',
+        // Archive disabled so the /rooms/ URL resolves to the Page we generate
+        // with the editable Divi-native rooms table layout. Without this the
+        // CPT archive would win and show the default Divi blog template.
+        'has_archive'         => false,
         'rewrite'             => array( 'slug' => 'room', 'with_front' => false ),
         'menu_icon'           => 'dashicons-admin-home',
         'menu_position'       => 20,
