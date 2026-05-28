@@ -235,12 +235,18 @@ input[type="submit"].hc-btn-primary {
 .hc-form-status.is-error { display: block; background: #ffebee; color: #c62828; }
 
 /* ============================================================
-   FOOTER
+   FOOTER  — we render our own via [hc_footer_widgets].
+   Hide Divi's default footer widgets + bottom bar to avoid duplication.
    ============================================================ */
-#main-footer { background: #14141e; color: #aaa; }
+#main-footer { background: #14141e; color: #aaa; padding: 0; }
+#main-footer .footer-widget,
+#main-footer #footer-widgets,
+#footer-bottom { display: none !important; }
 #main-footer a { color: #ccc; }
 #main-footer a:hover { color: var(--hc-red); }
-#footer-bottom { background: #0d0d14; }
+
+/* Our custom footer container (injected by et_after_main_content) */
+.hc-custom-footer-widgets { background: #14141e; }
 
 /* ============================================================
    RESPONSIVE

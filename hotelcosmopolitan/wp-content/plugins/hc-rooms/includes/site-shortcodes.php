@@ -421,7 +421,8 @@ add_shortcode( 'hc_counters', function () {
 } );
 
 /**
- * [hc_footer_widgets] — full 4-column footer block.
+ * [hc_footer_widgets] — full 4-column footer block with logo + icon-prefixed contact rows.
+ * Mirrors component/footer.php from the original site.
  */
 add_shortcode( 'hc_footer_widgets', function () {
     $phones  = hc_get( 'phones' );
@@ -429,23 +430,31 @@ add_shortcode( 'hc_footer_widgets', function () {
     $address = hc_get( 'address' );
     $fb      = hc_get( 'facebook_url' );
     $ig      = hc_get( 'instagram_url' );
+    $logo    = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/logo.png';
 
     ob_start(); ?>
-    <div class="hc-footer-widgets" style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1.3fr;gap:40px;padding:60px 0;">
-        <div>
-            <p style="font-style:italic;color:#ccc;font-size:18px;">A symphony of luxury and comfort</p>
-            <div style="margin-top:18px;">
+    <div class="hc-footer-widgets">
+
+        <div class="hc-fw-brand">
+            <img src="<?php echo esc_url( $logo ); ?>" alt="Hotel Cosmopolitan" class="hc-fw-logo">
+            <p class="hc-fw-tagline">A symphony of<br>luxury and comfort</p>
+            <div class="hc-fw-social">
                 <?php if ( $fb ) : ?>
-                    <a href="<?php echo esc_url( $fb ); ?>" target="_blank" rel="noopener" style="display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;background:#222;color:#fff;margin-right:8px;">f</a>
+                    <a href="<?php echo esc_url( $fb ); ?>" target="_blank" rel="noopener" aria-label="Facebook">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.97 3.64 9.09 8.4 9.84v-6.96H7.9V12h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.24.19 2.24.19v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 2.88h-2.34v6.96A9.96 9.96 0 0 0 21.96 12c0-5.5-4.46-9.96-9.96-9.96z"/></svg>
+                    </a>
                 <?php endif; ?>
                 <?php if ( $ig ) : ?>
-                    <a href="<?php echo esc_url( $ig ); ?>" target="_blank" rel="noopener" style="display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;background:#222;color:#fff;">i</a>
+                    <a href="<?php echo esc_url( $ig ); ?>" target="_blank" rel="noopener" aria-label="Instagram">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.65.25 1.21.59 1.77 1.15.51.5.9 1.1 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43-.25.65-.59 1.21-1.15 1.77-.5.51-1.1.9-1.77 1.15-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.25-.65.59-1.21 1.15-1.77.5-.51 1.1-.9 1.77-1.15.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.28 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.25a1.25 1.25 0 1 0-2.5 0 1.25 1.25 0 0 0 2.5 0zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+                    </a>
                 <?php endif; ?>
             </div>
         </div>
-        <div>
-            <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Rooms</h3>
-            <ul style="list-style:none;padding:0;margin:0;">
+
+        <div class="hc-fw-col">
+            <h3>Rooms</h3>
+            <ul>
                 <li><a href="<?php echo esc_url( home_url( '/room/executive-room/' ) ); ?>">Executive</a></li>
                 <li><a href="<?php echo esc_url( home_url( '/room/premium-room/' ) ); ?>">Premium</a></li>
                 <li><a href="<?php echo esc_url( home_url( '/room/presidential-room/' ) ); ?>">Presidential</a></li>
@@ -453,9 +462,10 @@ add_shortcode( 'hc_footer_widgets', function () {
                 <li><a href="<?php echo esc_url( home_url( '/room/deluxe-room/' ) ); ?>">Deluxe</a></li>
             </ul>
         </div>
-        <div>
-            <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Quick Links</h3>
-            <ul style="list-style:none;padding:0;margin:0;">
+
+        <div class="hc-fw-col">
+            <h3>Quick Links</h3>
+            <ul>
                 <li><a href="<?php echo esc_url( home_url( '/about-us/' ) ); ?>">About Us</a></li>
                 <li><a href="<?php echo esc_url( home_url( '/news-blogs/' ) ); ?>">News &amp; Blogs</a></li>
                 <li><a href="<?php echo esc_url( home_url( '/faq/' ) ); ?>">FAQ's</a></li>
@@ -463,22 +473,98 @@ add_shortcode( 'hc_footer_widgets', function () {
                 <li><a href="<?php echo esc_url( home_url( '/contact-us/' ) ); ?>">Contact Us</a></li>
             </ul>
         </div>
-        <div>
-            <h3 style="color:#fff;font-size:14px;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Contact Us</h3>
-            <?php if ( is_array( $phones ) ) foreach ( $phones as $p ) : ?>
-                <p style="margin:4px 0;"><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $p['value'] ) ); ?>"><?php echo esc_html( $p['value'] ); ?></a></p>
-            <?php endforeach; ?>
-            <?php if ( is_array( $emails ) ) foreach ( $emails as $e ) : ?>
-                <p style="margin:4px 0;"><a href="mailto:<?php echo esc_attr( $e['value'] ); ?>"><?php echo esc_html( $e['value'] ); ?></a></p>
-            <?php endforeach; ?>
-            <?php if ( $address ) : ?><p style="margin-top:10px;color:#ccc;"><?php echo esc_html( $address ); ?></p><?php endif; ?>
+
+        <div class="hc-fw-col hc-fw-contact">
+            <h3>Contact Us</h3>
+            <?php if ( is_array( $phones ) && $phones ) :
+                $phone_lines = array();
+                foreach ( $phones as $p ) {
+                    $tel = preg_replace( '/[^0-9+]/', '', $p['value'] );
+                    $phone_lines[] = '<a href="tel:' . esc_attr( $tel ) . '">' . esc_html( $p['value'] ) . '</a>';
+                } ?>
+                <div class="hc-fw-row">
+                    <svg class="hc-fw-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.07 15.07 0 0 1-6.58-6.58l2.2-2.21a1 1 0 0 0 .25-1.02A11.36 11.36 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1c0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>
+                    <div><?php echo implode( ' | ', $phone_lines ); ?></div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( is_array( $emails ) && $emails ) : foreach ( $emails as $e ) : ?>
+                <div class="hc-fw-row">
+                    <svg class="hc-fw-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    <a href="mailto:<?php echo esc_attr( $e['value'] ); ?>"><?php echo esc_html( $e['value'] ); ?></a>
+                </div>
+            <?php endforeach; endif; ?>
+
+            <?php if ( $address ) : ?>
+                <div class="hc-fw-row">
+                    <svg class="hc-fw-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                    <span><?php echo esc_html( $address ); ?></span>
+                </div>
+            <?php endif; ?>
+        </div>
+
+    </div>
+
+    <div class="hc-footer-copyright">
+        <div class="hc-copy-inner">
+            <p>&copy; <?php echo date( 'Y' ); ?> All Rights Reserved to Hotel Cosmopolitan</p>
+            <p>
+                <a href="<?php echo esc_url( home_url( '/terms-condition/' ) ); ?>">Terms &amp; Conditions</a> |
+                <a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>">Privacy Policy</a> |
+                <a href="<?php echo esc_url( home_url( '/reservation-policy/' ) ); ?>">Booking Policy</a> |
+                <a href="<?php echo esc_url( home_url( '/cancellation-policy/' ) ); ?>">Cancellation Policy</a>
+            </p>
         </div>
     </div>
+
     <style>
-        .hc-footer-widgets ul li { padding:4px 0; }
-        .hc-footer-widgets ul li a, .hc-footer-widgets p a { color:#ccc; text-decoration:none; }
-        .hc-footer-widgets ul li a:hover, .hc-footer-widgets p a:hover { color:#D81418; }
-        @media(max-width:768px){.hc-footer-widgets{grid-template-columns:1fr 1fr !important;}}
+        .hc-footer-widgets {
+            display:grid; grid-template-columns:1.3fr 1fr 1fr 1.5fr; gap:50px;
+            padding:70px 30px 50px; max-width:1300px; margin:0 auto;
+            font-family: 'Poppins', sans-serif;
+        }
+        .hc-fw-brand .hc-fw-logo { max-width:180px; height:auto; display:block; margin-bottom:18px; filter: brightness(0) invert(1); }
+        .hc-fw-tagline { font-style:italic; color:rgba(255,255,255,.75); font-size:16px; line-height:1.5; margin:0 0 18px; }
+        .hc-fw-social { display:flex; gap:10px; }
+        .hc-fw-social a {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:36px; height:36px; background:rgba(255,255,255,.08); color:#fff;
+            border:1px solid rgba(255,255,255,.15); transition:all .3s;
+        }
+        .hc-fw-social a:hover { background:#D81418; border-color:#D81418; }
+
+        .hc-fw-col h3, .hc-fw-contact h3 {
+            color:#fff; font-size:13px; letter-spacing:2px; text-transform:uppercase;
+            margin:0 0 22px; padding-bottom:10px; border-bottom:2px solid #D81418; display:inline-block;
+        }
+        .hc-fw-col ul { list-style:none; padding:0; margin:0; }
+        .hc-fw-col ul li { padding:5px 0; position:relative; padding-left:16px; }
+        .hc-fw-col ul li:before { content:"›"; color:#D81418; position:absolute; left:0; font-weight:bold; }
+        .hc-fw-col ul li a, .hc-fw-contact a, .hc-fw-contact span {
+            color:rgba(255,255,255,.75); text-decoration:none; font-size:14px; line-height:1.6;
+        }
+        .hc-fw-col ul li a:hover, .hc-fw-contact a:hover { color:#D81418; }
+
+        .hc-fw-row { display:flex; gap:10px; align-items:flex-start; margin:10px 0; }
+        .hc-fw-icon { flex:0 0 18px; color:#D81418; margin-top:3px; }
+        .hc-fw-row > div, .hc-fw-row > a, .hc-fw-row > span { font-size:14px; line-height:1.6; }
+
+        .hc-footer-copyright { background:#0a0a12; padding:20px 30px; color:rgba(255,255,255,.6); }
+        .hc-copy-inner {
+            max-width:1300px; margin:0 auto; display:flex; justify-content:space-between;
+            align-items:center; gap:20px; flex-wrap:wrap; font-size:13px;
+        }
+        .hc-copy-inner p { margin:0; }
+        .hc-copy-inner a { color:rgba(255,255,255,.7); text-decoration:none; }
+        .hc-copy-inner a:hover { color:#D81418; }
+
+        @media (max-width:900px){
+            .hc-footer-widgets { grid-template-columns:1fr 1fr; gap:30px; padding:50px 20px 30px; }
+            .hc-copy-inner { flex-direction:column; text-align:center; }
+        }
+        @media (max-width:480px){
+            .hc-footer-widgets { grid-template-columns:1fr; }
+        }
     </style>
     <?php
     return ob_get_clean();

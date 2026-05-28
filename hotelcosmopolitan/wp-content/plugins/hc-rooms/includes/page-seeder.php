@@ -217,9 +217,10 @@ function hc_pages_build_menu( $pages, $created_ids ) {
  * Seed all 30+ SEO landing pages from data/seo-landing-pages.json (pre-extracted
  * from the original public_html/ files at build time).
  *
- * Each gets the SEO landing Divi layout wrapping its original prose content,
- * with the original meta title + meta description preserved as post meta so an
- * SEO plugin (Yoast / RankMath) can pick them up.
+ * Tracked via `hc_seo_pages_seeded_v3` (bumped to v3 when the layout grew the
+ * Awards / Facilities / Testimonials / Counters / Gallery / Contact sections).
+ * When the flag is missing, EXISTING pages are updated in place (post_content
+ * rebuilt) instead of being skipped. This makes layout upgrades safe.
  */
 function hc_pages_seed_seo_pages() {
     $path = HC_ROOMS_DIR . 'data/seo-landing-pages.json';
@@ -228,12 +229,14 @@ function hc_pages_seed_seo_pages() {
     $json = json_decode( file_get_contents( $path ), true );
     if ( ! is_array( $json ) ) return;
 
-    $layout_wrapper = hc_load_layout_content( 'seo-landing-template.json' );
+    $needs_rebuild = ! get_option( 'hc_seo_pages_seeded_v3' );
 
     foreach ( $json as $entry ) {
         $slug = isset( $entry['slug'] ) ? sanitize_title( $entry['slug'] ) : '';
         if ( ! $slug ) continue;
-        if ( get_page_by_path( $slug ) ) continue; // already exists
+
+        $existing = get_page_by_path( $slug );
+        if ( $existing && ! $needs_rebuild ) continue; // already up to date
 
         // Inject the original prose content where the et_pb_post_content module sits.
         // We do this by appending an et_pb_text block before the rooms grid so the
@@ -243,34 +246,119 @@ function hc_pages_seed_seo_pages() {
         $content = ! empty( $entry['content'] ) ? $entry['content'] : '<p>Content coming soon.</p>';
 
         // Build a self-contained Divi page that embeds the prose as a text module
+        // Sections: Hero / About+Image+Inquiry / Awards / Rooms / Facility icons /
+        // Testimonials / Counters / Gallery / Contact form
+        $theme_uri = get_stylesheet_directory_uri();
         $body = '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#14141e" custom_padding="180px||80px||false|false"]'
               . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
               . '[et_pb_text _builder_version="4.20.0" header_font="Poppins|700|on||||||" text_text_color="#ffffff" header_text_color="#ffffff" header_font_size="42px" text_text_align="center" header_text_align="center"]'
               . '<h1>' . esc_html( $title ) . '</h1>'
+              . '<ul class="hc-breadcrumbs" style="justify-content:center;color:#fff;list-style:none;padding:0;margin:10px 0 0;display:flex;gap:8px;font-size:13px;">'
+              . '<li><a href="/" style="color:rgba(255,255,255,0.85);">Home</a></li>'
+              . '<li>/</li>'
+              . '<li class="active" style="color:#D81418;">' . esc_html( $title ) . '</li>'
+              . '</ul>'
               . '[/et_pb_text][/et_pb_column][/et_pb_row][/et_pb_section]'
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||40px||true|false"]'
-              . '[et_pb_row column_structure="2_3,1_3" _builder_version="4.20.0"]'
-              . '[et_pb_column type="2_3" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em"]'
+
+              // --- About + image + Quick Inquiry ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="80px||60px||true|false"]'
+              . '[et_pb_row column_structure="1_2,1_4,1_4" _builder_version="4.20.0"]'
+              . '[et_pb_column type="1_2" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em" header_3_font="Poppins|600|||||||" header_3_text_color="#14141e"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0 0 8px;font-weight:600;">WELCOME TO</p>'
+              . '<h3 style="font-size:28px;margin:0 0 20px;">' . esc_html( $title ) . '</h3>'
               . wp_kses_post( $content )
               . '[/et_pb_text][/et_pb_column]'
-              . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
-              . '[et_pb_code _builder_version="4.20.0"]<div id="quickbook-widget"></div>[/et_pb_code]'
-              . '[et_pb_code _builder_version="4.20.0" custom_margin="20px||||false|false"][hc_inquiry_form variant="booking" title="Quick Inquiry"][/et_pb_code]'
+              . '[et_pb_column type="1_4" _builder_version="4.20.0"]'
+              . '[et_pb_image src="' . esc_url( $theme_uri . '/assets/images/building.webp' ) . '" alt="Hotel Cosmopolitan" _builder_version="4.20.0"][/et_pb_image]'
+              . '[/et_pb_column]'
+              . '[et_pb_column type="1_4" _builder_version="4.20.0"]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_inquiry_form variant="booking" title="Quick Inquiry"][/et_pb_code]'
               . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="60px||60px||true|false"]'
+
+              // --- Awards ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
               . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_align="center" custom_margin="||30px||false|false"]<h2>Our Rooms</h2>[/et_pb_text]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Recognition</p>'
+              . '<h2>Awards and Accolades</h2>[/et_pb_text]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_awards][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Our Rooms ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="70px||70px||true|false"]'
+              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">EXPLORE</p>'
+              . '<h2>Our Rooms</h2>[/et_pb_text]'
               . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Why Choose Us (facility icons) ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
+              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||40px||false|false"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Facilities</p>'
+              . '<h2>Why Choose Us</h2>[/et_pb_text]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_facility_icons][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Testimonials (on dark background like home) ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#14141e" custom_padding="70px||70px||true|false"]'
+              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#ffffff" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
+              . '<p style="color:#E88800;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">People Reviews</p>'
+              . '<h2 style="color:#fff;">What Our Guests Say</h2>[/et_pb_text]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_testimonials][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Counters (50+ Rooms / 70+ Staff / 100+ Dishes) ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="0|0|0|0|false|false"]'
+              . '[et_pb_row _builder_version="4.20.0" use_custom_gutter="on" gutter_width="1" custom_padding="0|0|0|0|false|false" custom_margin="0|auto|0|auto|false|false" max_width="100%"]'
+              . '[et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_counters][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Gallery slider ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="70px||70px||true|false"]'
+              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Gallery</p>'
+              . '<h2>Take a Tour of Our Hotel</h2>[/et_pb_text]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_gallery_slider][/et_pb_code]'
+              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+
+              // --- Contact form ---
+              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
+              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
+              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Contact Us</p>'
+              . '<h2>Send a Message</h2>[/et_pb_text]'
+              . '[/et_pb_column][/et_pb_row]'
+              . '[et_pb_row column_structure="2_3,1_3" _builder_version="4.20.0"]'
+              . '[et_pb_column type="2_3" _builder_version="4.20.0"]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_inquiry_form variant="inquiry"][/et_pb_code]'
+              . '[/et_pb_column]'
+              . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+              . '[et_pb_code _builder_version="4.20.0"][hc_contact_info style="light"][/et_pb_code]'
               . '[/et_pb_column][/et_pb_row][/et_pb_section]';
 
-        $post_id = wp_insert_post( array(
-            'post_type'    => 'page',
-            'post_status'  => 'publish',
-            'post_title'   => $title,
-            'post_name'    => $slug,
-            'post_content' => $body,
-        ) );
+        if ( $existing ) {
+            // Update existing page content in place
+            $post_id = wp_update_post( array(
+                'ID'           => $existing->ID,
+                'post_title'   => $title,
+                'post_content' => $body,
+            ) );
+        } else {
+            $post_id = wp_insert_post( array(
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+                'post_title'   => $title,
+                'post_name'    => $slug,
+                'post_content' => $body,
+            ) );
+        }
 
         if ( is_wp_error( $post_id ) || ! $post_id ) continue;
 
@@ -289,6 +377,8 @@ function hc_pages_seed_seo_pages() {
             update_post_meta( $post_id, '_hc_original_meta_desc',      $entry['meta_description'] );
         }
     }
+
+    update_option( 'hc_seo_pages_seeded_v3', 1 );
 }
 
 /**
