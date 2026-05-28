@@ -65,41 +65,6 @@ add_action( 'after_setup_theme', function () {
 } );
 
 /**
- * Auto-set the Divi logo to assets/images/logo.png on first admin load.
- * Imports it as a Media Library attachment and points Divi's "logo" option to it.
- *
- * Only runs once — tracked via the `hc_logo_set` option.
- */
-add_action( 'admin_init', function () {
-    if ( get_option( 'hc_logo_set' ) ) return;
-    if ( ! function_exists( 'hc_import_attachment' ) ) return;
-
-    $att_id = hc_import_attachment( 'images/logo.png', 0, 'Hotel Cosmopolitan Logo' );
-    if ( is_wp_error( $att_id ) || ! $att_id ) return;
-    $url = wp_get_attachment_url( $att_id );
-    if ( ! $url ) return;
-
-    // Divi stores its options in et_divi (array)
-    $divi_options = get_option( 'et_divi', array() );
-    if ( ! is_array( $divi_options ) ) $divi_options = array();
-    $divi_options['divi_logo']        = $url;
-    $divi_options['fixed_logo']       = $url;
-    $divi_options['mobile_logo']      = $url;
-    update_option( 'et_divi', $divi_options );
-
-    // Also set as Customizer site logo (some Divi templates read this)
-    set_theme_mod( 'custom_logo', $att_id );
-
-    update_option( 'hc_logo_set', 1 );
-}, 50 );
-
-/**
- * Hide Divi's default footer markup — we render our own via [hc_footer_widgets]
- * injected through et_after_main_content. CSS overrides handle the visual cleanup.
- */
-add_filter( 'et_divi_footer_credits', '__return_empty_string' );
-
-/**
  * Inject schema.org Hotel JSON-LD into <head>. Mirrors component/header.php from original.
  * Editable later via Customizer / ACF options page if you want; for now hard-coded to match
  * existing SEO footprint exactly.
