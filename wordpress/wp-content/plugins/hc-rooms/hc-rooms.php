@@ -22,6 +22,7 @@ require_once HC_ROOMS_DIR . 'includes/meta-box.php';
 require_once HC_ROOMS_DIR . 'includes/site-options.php';
 require_once HC_ROOMS_DIR . 'includes/shortcodes.php';
 require_once HC_ROOMS_DIR . 'includes/site-shortcodes.php';
+require_once HC_ROOMS_DIR . 'includes/divi-builders.php';
 require_once HC_ROOMS_DIR . 'includes/seed-data.php';
 require_once HC_ROOMS_DIR . 'includes/page-seeder.php';
 require_once HC_ROOMS_DIR . 'includes/wp-cli.php';
@@ -34,6 +35,9 @@ register_activation_hook( __FILE__, function () {
     delete_option( 'hc_rooms_seeded' );
     delete_option( 'hc_site_content_seeded' );
     delete_option( 'hc_pages_seeded' );
+    delete_option( 'hc_pages_seeded_v2' );
+    delete_option( 'hc_pages_seeded_v3' );
+    delete_option( 'hc_seo_pages_seeded_v3' );
     flush_rewrite_rules();
 } );
 

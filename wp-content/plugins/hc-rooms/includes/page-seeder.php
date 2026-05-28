@@ -1,11 +1,16 @@
 <?php
 /**
- * Auto-create all pages with their Divi layout content on plugin activation,
- * plus build the primary nav menu, set the homepage, and flush permalinks.
+ * Auto-create pages with NATIVE Divi modules (et_pb_slider, et_pb_blurb,
+ * et_pb_testimonial, et_pb_number_counter, et_pb_gallery, et_pb_image,
+ * et_pb_text, et_pb_button) instead of custom [hc_*] shortcode wrappers,
+ * so the client can edit each piece visually in Divi Builder.
  *
- * Idempotent: skips pages that already exist (matched by slug).
+ * Only sections that have no native Divi equivalent stay as custom
+ * shortcodes: [hc_rooms_grid] (queries the room CPT), [hc_inquiry_form]
+ * (saves to DB + emails), [hc_footer_widgets] (richer than Divi's footer).
  *
- * Tracked via the `hc_pages_seeded` option flag.
+ * Idempotent: bumped to v4 so existing pages from v2/v3 get rebuilt
+ * automatically when the client pulls + visits admin.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -14,213 +19,315 @@ add_action( 'admin_init', 'hc_pages_seed', 40 );
 
 function hc_pages_seed() {
 
-    if ( get_option( 'hc_pages_seeded_v2' ) ) return;
-
-    // The 9 pages we ship layouts for, in menu order
-    $pages = array(
-        array(
-            'slug'      => 'home',
-            'title'     => 'Home',
-            'layout'    => 'home-layout.json',
-            'menu'      => false,                  // not in primary menu (it's the home logo)
-        ),
-        array(
-            'slug'      => 'about-us',
-            'title'     => 'About Us',
-            'layout'    => 'about-us-layout.json',
-            'menu'      => true,
-            'mobile'    => true,                  // only mobile menu
-        ),
-        array(
-            'slug'      => 'rooms',
-            'title'     => 'Rooms',
-            'layout'    => 'rooms-archive-layout.json',
-            'menu'      => true,
-        ),
-        array(
-            'slug'      => 'restaurant',
-            'title'     => 'Coriander Restaurant',
-            'layout'    => 'restaurant-layout.json',
-            'menu'      => true,
-        ),
-        array(
-            'slug'      => 'banquet-hall',
-            'title'     => 'Banquet Hall',
-            'layout'    => 'banquet-hall-layout.json',
-            'menu'      => true,
-        ),
-        array(
-            'slug'      => 'conference-room',
-            'title'     => 'Board Room',
-            'layout'    => 'conference-room-layout.json',
-            'menu'      => true,
-        ),
-        array(
-            'slug'      => 'facilities',
-            'title'     => 'Facilities',
-            'layout'    => 'facilities-layout.json',
-            'menu'      => false,                  // not in primary; lives in mobile
-            'mobile'    => true,
-        ),
-        array(
-            'slug'      => 'gallery',
-            'title'     => 'Gallery',
-            'layout'    => 'gallery-layout.json',
-            'menu'      => true,
-        ),
-        array(
-            'slug'      => 'contact-us',
-            'title'     => 'Contact Us',
-            'layout'    => 'contact-us-layout.json',
-            'menu'      => true,
-        ),
-    );
-
-    // Static (non-Divi-builder) pages from public_html/ — FAQ + policies + 404 + blogs index
-    $static_pages = hc_pages_static_definitions();
+    if ( get_option( 'hc_pages_seeded_v4' ) ) return;
 
     $created_ids = array();
 
-    // ----- 1. Divi-builder pages -----
+    // ----- 1. Build each main page from a layout builder function -----
+    $pages = hc_pages_main_definitions();
     foreach ( $pages as $p ) {
         $existing = get_page_by_path( $p['slug'] );
+        $content  = call_user_func( $p['builder'] );
+
         if ( $existing ) {
-            $created_ids[ $p['slug'] ] = $existing->ID;
-            continue;
+            // Rebuild existing pages in place — needed so v4 layouts replace v2/v3
+            wp_update_post( array(
+                'ID'           => $existing->ID,
+                'post_title'   => $p['title'],
+                'post_content' => $content,
+            ) );
+            $post_id = $existing->ID;
+        } else {
+            $post_id = wp_insert_post( array(
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+                'post_title'   => $p['title'],
+                'post_name'    => $p['slug'],
+                'post_content' => $content,
+            ) );
+            if ( is_wp_error( $post_id ) || ! $post_id ) continue;
         }
 
-        $content = hc_load_layout_content( $p['layout'] );
+        update_post_meta( $post_id, '_et_pb_use_builder', 'on' );
+        update_post_meta( $post_id, '_et_pb_page_layout', 'et_no_sidebar' );
+        update_post_meta( $post_id, '_et_pb_side_nav',    'off' );
 
-        $post_id = wp_insert_post( array(
-            'post_type'    => 'page',
-            'post_status'  => 'publish',
-            'post_title'   => $p['title'],
-            'post_name'    => $p['slug'],
-            'post_content' => $content,
-        ) );
-
-        if ( ! is_wp_error( $post_id ) && $post_id ) {
-            // Tell Divi this page uses the builder
-            update_post_meta( $post_id, '_et_pb_use_builder', 'on' );
-            update_post_meta( $post_id, '_et_pb_page_layout', 'et_no_sidebar' );
-            update_post_meta( $post_id, '_et_pb_side_nav',    'off' );
-            $created_ids[ $p['slug'] ] = $post_id;
-        }
+        $created_ids[ $p['slug'] ] = $post_id;
     }
 
-    // ----- 2. Static text pages -----
-    foreach ( $static_pages as $p ) {
+    // ----- 2. Static text pages (FAQ + policies + news/blogs index) -----
+    foreach ( hc_pages_static_definitions() as $p ) {
         $existing = get_page_by_path( $p['slug'] );
         if ( $existing ) {
+            wp_update_post( array(
+                'ID'           => $existing->ID,
+                'post_title'   => $p['title'],
+                'post_content' => $p['content'],
+            ) );
             $created_ids[ $p['slug'] ] = $existing->ID;
-            continue;
-        }
-        $post_id = wp_insert_post( array(
-            'post_type'    => 'page',
-            'post_status'  => 'publish',
-            'post_title'   => $p['title'],
-            'post_name'    => $p['slug'],
-            'post_content' => $p['content'],
-        ) );
-        if ( ! is_wp_error( $post_id ) && $post_id ) {
-            $created_ids[ $p['slug'] ] = $post_id;
+        } else {
+            $post_id = wp_insert_post( array(
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+                'post_title'   => $p['title'],
+                'post_name'    => $p['slug'],
+                'post_content' => $p['content'],
+            ) );
+            if ( ! is_wp_error( $post_id ) && $post_id ) {
+                $created_ids[ $p['slug'] ] = $post_id;
+            }
         }
     }
 
-    // ----- 2b. SEO landing pages (extracted from public_html/) -----
+    // ----- 3. SEO landing pages -----
     hc_pages_seed_seo_pages();
 
-    // ----- 3. Set front page to "Home" -----
+    // ----- 4. Set front page to "Home" -----
     if ( isset( $created_ids['home'] ) ) {
         update_option( 'show_on_front', 'page' );
         update_option( 'page_on_front', $created_ids['home'] );
     }
 
-    // ----- 4. Set permalink structure to /%postname%/ -----
+    // ----- 5. Permalinks -----
     if ( '/%postname%/' !== get_option( 'permalink_structure' ) ) {
         update_option( 'permalink_structure', '/%postname%/' );
     }
 
-    // ----- 5. Build the Primary Menu -----
+    // ----- 6. Primary menu -----
     hc_pages_build_menu( $pages, $created_ids );
 
-    // ----- 6. Flush rewrites -----
+    // ----- 7. Flush rewrites + mark done -----
     flush_rewrite_rules();
-
-    update_option( 'hc_pages_seeded_v2', 1 );
+    update_option( 'hc_pages_seeded_v4', 1 );
     delete_option( 'hc_pages_seeded' );
+    delete_option( 'hc_pages_seeded_v2' );
 }
 
 /**
- * Load Divi layout JSON shipped in /layouts/ and return the embedded shortcode content.
+ * Definitions for the 9 main Divi-builder pages — each has a `builder`
+ * callable that returns its full post_content.
  */
-function hc_load_layout_content( $filename ) {
-    $path = HC_ROOMS_DIR . 'layouts/' . $filename;
-    if ( ! file_exists( $path ) ) return '';
+function hc_pages_main_definitions() {
+    return array(
 
-    $raw = file_get_contents( $path );
-    $json = json_decode( $raw, true );
-    if ( ! is_array( $json ) || empty( $json['data'] ) ) return '';
-
-    // data is an object keyed by post id ("1") with the shortcode string as value
-    $content = is_array( $json['data'] ) ? reset( $json['data'] ) : '';
-
-    // Replace placeholders
-    $content = str_replace(
-        array( '@@HC_THEME_URI@@' ),
-        array( get_stylesheet_directory_uri() ),
-        $content
+        array(
+            'slug'    => 'home',
+            'title'   => 'Home',
+            'builder' => 'hc_build_home_page',
+            'menu'    => false,
+        ),
+        array(
+            'slug'    => 'about-us',
+            'title'   => 'About Us',
+            'builder' => 'hc_build_about_page',
+            'menu'    => true,
+            'mobile'  => true,
+        ),
+        array(
+            'slug'    => 'rooms',
+            'title'   => 'Rooms',
+            'builder' => 'hc_build_rooms_archive_page',
+            'menu'    => true,
+        ),
+        array(
+            'slug'    => 'restaurant',
+            'title'   => 'Coriander Restaurant',
+            'builder' => 'hc_build_restaurant_page',
+            'menu'    => true,
+        ),
+        array(
+            'slug'    => 'banquet-hall',
+            'title'   => 'Banquet Hall',
+            'builder' => 'hc_build_banquet_page',
+            'menu'    => true,
+        ),
+        array(
+            'slug'    => 'conference-room',
+            'title'   => 'Board Room',
+            'builder' => 'hc_build_conference_page',
+            'menu'    => true,
+        ),
+        array(
+            'slug'    => 'facilities',
+            'title'   => 'Facilities',
+            'builder' => 'hc_build_facilities_page',
+            'menu'    => false,
+            'mobile'  => true,
+        ),
+        array(
+            'slug'    => 'gallery',
+            'title'   => 'Gallery',
+            'builder' => 'hc_build_gallery_page',
+            'menu'    => true,
+        ),
+        array(
+            'slug'    => 'contact-us',
+            'title'   => 'Contact Us',
+            'builder' => 'hc_build_contact_page',
+            'menu'    => true,
+        ),
     );
+}
 
-    return $content;
+/* ============================================================
+ * Per-page builders (all use native Divi modules via includes/divi-builders.php)
+ * ============================================================ */
+
+function hc_build_home_page() {
+    return hc_divi_hero()
+         . hc_divi_home_about()
+         . hc_divi_category_cards()
+         . hc_divi_facilities()
+         . hc_divi_rooms_section()
+         . hc_divi_gallery_slider()
+         . hc_divi_testimonials()
+         . hc_divi_awards();
+}
+
+function hc_build_about_page() {
+    return hc_divi_page_title( 'About Us' )
+         . hc_divi_about_intro()
+         . hc_divi_counters()
+         . hc_divi_facilities( 'Why Choose', 'Our Hotel' )
+         . hc_divi_gallery_slider();
+}
+
+function hc_build_rooms_archive_page() {
+    return hc_divi_page_title( 'Rooms' )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||100px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+}
+
+function hc_build_restaurant_page() {
+    return hc_divi_page_title( 'Coriander Restaurant', array( array( 'label' => 'Facilities', 'url' => home_url( '/facilities/' ) ) ) )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||60px||true|false"]'
+            . '[et_pb_row column_structure="2_3,1_3" _builder_version="4.20.0"]'
+            . '[et_pb_column type="2_3" _builder_version="4.20.0"]'
+            . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px"]'
+            . '<h2>Coriander Restaurant</h2>'
+            . '<p>Coriander — our restaurant serves a blend of popular cuisines including North Indian, South Indian, Gujarati, Oriental as well as Continental. Coriander offers a delectable choice of starters and main courses. Guests can relish an array of Indian and global dishes with the choice of vegetarian and Jain preparations. The restaurant is open to hotel guests as well as outside patrons. We serve breakfast, lunch and dinner.</p>'
+            . '[/et_pb_text]'
+            . '[/et_pb_column]'
+            . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+            . hc_divi_restaurant_hours()
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+         . hc_divi_category_grid( 'restaurant_cuisines', 'Menu', 'Our Cuisines', 3 );
+}
+
+function hc_build_banquet_page() {
+    $theme_uri = get_stylesheet_directory_uri();
+    return hc_divi_page_title( 'Banquet Hall', array( array( 'label' => 'Facilities', 'url' => home_url( '/facilities/' ) ) ) )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="80px||60px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" text_text_align="center"]'
+            . '<h2>Grand Banquet Hall in Ahmedabad</h2>'
+            . '<p>From weddings to corporate gatherings, our banquet hall at Hotel Cosmopolitan sets the perfect stage. With elegant decor, modern AV, ample capacity and a curated catering menu by Coriander, it\'s a versatile venue for any occasion.</p>'
+            . '[/et_pb_text]'
+            . '[et_pb_image src="' . esc_url( $theme_uri . '/assets/images/gallery/banquet-hall-1.webp' ) . '" alt="Banquet Hall" _builder_version="4.20.0" custom_margin="30px||30px||true|false"][/et_pb_image]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+         . hc_divi_category_grid( 'banquet_categories', 'Occasions', 'Events We Host', 3 )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||60px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . '[et_pb_button button_text="Enquire About Banquet Hall" button_url="' . esc_url( home_url( '/contact-us/' ) ) . '" button_alignment="center" _builder_version="4.20.0" custom_button="on" button_text_size="14px" button_text_color="#ffffff" button_bg_color="#D81418" button_border_width="2px" button_border_color="#D81418" button_letter_spacing="2px" button_font="Poppins|600|on||||||"][/et_pb_button]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+}
+
+function hc_build_conference_page() {
+    $theme_uri = get_stylesheet_directory_uri();
+    return hc_divi_page_title( 'Board Room', array( array( 'label' => 'Facilities', 'url' => home_url( '/facilities/' ) ) ) )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="80px||60px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" text_text_align="center"]'
+            . '<h2>A Space for Innovation and Collaboration</h2>'
+            . '<p>Our fully-equipped board room is built for productive conversations. Conference-grade AV, fast Wi-Fi, comfortable seating and on-call Coriander catering — everything you need for meetings, training and presentations.</p>'
+            . '[/et_pb_text]'
+            . '[et_pb_image src="' . esc_url( $theme_uri . '/assets/images/corona-hall/corona-hall-1.webp' ) . '" alt="Board Room" _builder_version="4.20.0" custom_margin="30px||30px||true|false"][/et_pb_image]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+         . hc_divi_category_grid( 'conference_categories', 'Use Cases', 'Perfect For', 3 )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||60px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . '[et_pb_button button_text="Book the Board Room" button_url="' . esc_url( home_url( '/contact-us/' ) ) . '" button_alignment="center" _builder_version="4.20.0" custom_button="on" button_text_size="14px" button_text_color="#ffffff" button_bg_color="#D81418" button_border_width="2px" button_border_color="#D81418" button_letter_spacing="2px" button_font="Poppins|600|on||||||"][/et_pb_button]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+}
+
+function hc_build_facilities_page() {
+    $theme_uri = get_stylesheet_directory_uri();
+    return hc_divi_page_title( 'Facilities' )
+         . hc_divi_facilities( 'Facilities', 'Why Choose Us' )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||80px||true|false"]'
+            . '[et_pb_row column_structure="1_3,1_3,1_3" _builder_version="4.20.0"]'
+            . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+            . '[et_pb_blurb title="Coriander Restaurant" url="' . esc_url( home_url( '/restaurant/' ) ) . '" image="' . esc_url( $theme_uri . '/assets/images/home/restaurent.webp' ) . '" _builder_version="4.20.0" header_level="h3" header_font="Poppins|600|||||||" header_text_align="center" body_text_align="center" text_orientation="center"]Multi-cuisine fine dining — North Indian, South Indian, Gujarati, Oriental and Continental.[/et_pb_blurb]'
+            . '[/et_pb_column]'
+            . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+            . '[et_pb_blurb title="Banquet Hall" url="' . esc_url( home_url( '/banquet-hall/' ) ) . '" image="' . esc_url( $theme_uri . '/assets/images/home/banquet-hall.webp' ) . '" _builder_version="4.20.0" header_level="h3" header_font="Poppins|600|||||||" header_text_align="center" body_text_align="center" text_orientation="center"]Grand banquet hall for weddings, conferences and celebrations.[/et_pb_blurb]'
+            . '[/et_pb_column]'
+            . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+            . '[et_pb_blurb title="Board Room" url="' . esc_url( home_url( '/conference-room/' ) ) . '" image="' . esc_url( $theme_uri . '/assets/images/home/conference-room.webp' ) . '" _builder_version="4.20.0" header_level="h3" header_font="Poppins|600|||||||" header_text_align="center" body_text_align="center" text_orientation="center"]Fully-equipped conference and board-room facilities for corporate gatherings.[/et_pb_blurb]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+}
+
+function hc_build_gallery_page() {
+    return hc_divi_page_title( 'Gallery' )
+         . hc_divi_gallery_grid();
+}
+
+function hc_build_contact_page() {
+    return hc_divi_page_title( 'Contact' )
+         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="80px||60px||true|false"]'
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . hc_divi_heading( 'Contact Us', 'Send a Message' )
+            . '[/et_pb_column][/et_pb_row]'
+            . '[et_pb_row column_structure="2_3,1_3" _builder_version="4.20.0"]'
+            . '[et_pb_column type="2_3" _builder_version="4.20.0"]'
+            . '[et_pb_code _builder_version="4.20.0"][hc_inquiry_form variant="inquiry"][/et_pb_code]'
+            . '[/et_pb_column]'
+            . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
+            . hc_divi_contact_info_block()
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]'
+         . hc_divi_map_block();
 }
 
 /**
- * Build (or update) a "Primary Menu" matching the original site navigation.
+ * Build/update the primary nav menu.
  */
 function hc_pages_build_menu( $pages, $created_ids ) {
     $menu_name = 'Primary Menu';
-
     $menu = wp_get_nav_menu_object( $menu_name );
     if ( ! $menu ) {
         $menu_id = wp_create_nav_menu( $menu_name );
         $menu = wp_get_nav_menu_object( $menu_id );
     }
-
     if ( ! $menu ) return;
     $menu_id = $menu->term_id;
 
-    // Skip if menu already has items (don't overwrite manual edits)
-    $existing_items = wp_get_nav_menu_items( $menu_id );
-    if ( $existing_items ) return;
-
-    foreach ( $pages as $p ) {
-        if ( empty( $p['menu'] ) ) continue;
-        if ( empty( $created_ids[ $p['slug'] ] ) ) continue;
-
-        wp_update_nav_menu_item( $menu_id, 0, array(
-            'menu-item-title'     => $p['title'],
-            'menu-item-object'    => 'page',
-            'menu-item-object-id' => $created_ids[ $p['slug'] ],
-            'menu-item-type'      => 'post_type',
-            'menu-item-status'    => 'publish',
-        ) );
+    if ( wp_get_nav_menu_items( $menu_id ) ) {
+        // Don't overwrite an existing populated menu (might be hand-edited)
+    } else {
+        foreach ( $pages as $p ) {
+            if ( empty( $p['menu'] ) ) continue;
+            if ( empty( $created_ids[ $p['slug'] ] ) ) continue;
+            wp_update_nav_menu_item( $menu_id, 0, array(
+                'menu-item-title'     => $p['title'],
+                'menu-item-object'    => 'page',
+                'menu-item-object-id' => $created_ids[ $p['slug'] ],
+                'menu-item-type'      => 'post_type',
+                'menu-item-status'    => 'publish',
+            ) );
+        }
     }
 
-    // Assign to the "primary-menu" theme location
     $locations = get_theme_mod( 'nav_menu_locations', array() );
     $locations['primary-menu'] = $menu_id;
     set_theme_mod( 'nav_menu_locations', $locations );
 }
 
 /**
- * Seed all 30+ SEO landing pages from data/seo-landing-pages.json (pre-extracted
- * from the original public_html/ files at build time).
- *
- * Tracked via `hc_seo_pages_seeded_v3` (bumped to v3 when the layout grew the
- * Awards / Facilities / Testimonials / Counters / Gallery / Contact sections).
- * When the flag is missing, EXISTING pages are updated in place (post_content
- * rebuilt) instead of being skipped. This makes layout upgrades safe.
+ * SEO landing pages — same Divi-native section stack as the home page,
+ * but the about block carries the page's prose content from the original
+ * public_html/*.php files (pre-extracted into data/seo-landing-pages.json).
  */
 function hc_pages_seed_seo_pages() {
     $path = HC_ROOMS_DIR . 'data/seo-landing-pages.json';
@@ -229,127 +336,32 @@ function hc_pages_seed_seo_pages() {
     $json = json_decode( file_get_contents( $path ), true );
     if ( ! is_array( $json ) ) return;
 
-    $needs_rebuild = ! get_option( 'hc_seo_pages_seeded_v3' );
-
     foreach ( $json as $entry ) {
         $slug = isset( $entry['slug'] ) ? sanitize_title( $entry['slug'] ) : '';
         if ( ! $slug ) continue;
 
+        $title = isset( $entry['title'] ) ? wp_strip_all_tags( $entry['title'] ) : ucfirst( str_replace( '-', ' ', $slug ) );
+        $title = ucwords( strtolower( $title ) );
+        $prose = ! empty( $entry['content'] ) ? $entry['content'] : '<p>Content coming soon.</p>';
+
+        $body = hc_divi_page_title( $title )
+              . hc_divi_about_with_inquiry( $title, 'Welcome To', $prose )
+              . hc_divi_awards()
+              . hc_divi_rooms_section()
+              . hc_divi_facilities()
+              . hc_divi_testimonials()
+              . hc_divi_counters()
+              . hc_divi_gallery_slider()
+              . hc_divi_inquiry_section();
+
         $existing = get_page_by_path( $slug );
-        if ( $existing && ! $needs_rebuild ) continue; // already up to date
-
-        // Inject the original prose content where the et_pb_post_content module sits.
-        // We do this by appending an et_pb_text block before the rooms grid so the
-        // Divi layout still works AND the content shows.
-        $title   = isset( $entry['title'] ) ? wp_strip_all_tags( $entry['title'] ) : ucfirst( str_replace( '-', ' ', $slug ) );
-        $title   = ucwords( strtolower( $title ) );  // normalize ALLCAPS originals
-        $content = ! empty( $entry['content'] ) ? $entry['content'] : '<p>Content coming soon.</p>';
-
-        // Build a self-contained Divi page that embeds the prose as a text module
-        // Sections: Hero / About+Image+Inquiry / Awards / Rooms / Facility icons /
-        // Testimonials / Counters / Gallery / Contact form
-        $theme_uri = get_stylesheet_directory_uri();
-        $body = '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#14141e" custom_padding="180px||80px||false|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_font="Poppins|700|on||||||" text_text_color="#ffffff" header_text_color="#ffffff" header_font_size="42px" text_text_align="center" header_text_align="center"]'
-              . '<h1>' . esc_html( $title ) . '</h1>'
-              . '<ul class="hc-breadcrumbs" style="justify-content:center;color:#fff;list-style:none;padding:0;margin:10px 0 0;display:flex;gap:8px;font-size:13px;">'
-              . '<li><a href="/" style="color:rgba(255,255,255,0.85);">Home</a></li>'
-              . '<li>/</li>'
-              . '<li class="active" style="color:#D81418;">' . esc_html( $title ) . '</li>'
-              . '</ul>'
-              . '[/et_pb_text][/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- About + image + Quick Inquiry ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="80px||60px||true|false"]'
-              . '[et_pb_row column_structure="1_2,1_4,1_4" _builder_version="4.20.0"]'
-              . '[et_pb_column type="1_2" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" text_font_size="16px" text_line_height="1.8em" header_3_font="Poppins|600|||||||" header_3_text_color="#14141e"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0 0 8px;font-weight:600;">WELCOME TO</p>'
-              . '<h3 style="font-size:28px;margin:0 0 20px;">' . esc_html( $title ) . '</h3>'
-              . wp_kses_post( $content )
-              . '[/et_pb_text][/et_pb_column]'
-              . '[et_pb_column type="1_4" _builder_version="4.20.0"]'
-              . '[et_pb_image src="' . esc_url( $theme_uri . '/assets/images/building.webp' ) . '" alt="Hotel Cosmopolitan" _builder_version="4.20.0"][/et_pb_image]'
-              . '[/et_pb_column]'
-              . '[et_pb_column type="1_4" _builder_version="4.20.0"]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_inquiry_form variant="booking" title="Quick Inquiry"][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Awards ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Recognition</p>'
-              . '<h2>Awards and Accolades</h2>[/et_pb_text]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_awards][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Our Rooms ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">EXPLORE</p>'
-              . '<h2>Our Rooms</h2>[/et_pb_text]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Why Choose Us (facility icons) ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||40px||false|false"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Facilities</p>'
-              . '<h2>Why Choose Us</h2>[/et_pb_text]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_facility_icons][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Testimonials (on dark background like home) ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#14141e" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#ffffff" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
-              . '<p style="color:#E88800;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">People Reviews</p>'
-              . '<h2 style="color:#fff;">What Our Guests Say</h2>[/et_pb_text]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_testimonials][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Counters (50+ Rooms / 70+ Staff / 100+ Dishes) ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="0|0|0|0|false|false"]'
-              . '[et_pb_row _builder_version="4.20.0" use_custom_gutter="on" gutter_width="1" custom_padding="0|0|0|0|false|false" custom_margin="0|auto|0|auto|false|false" max_width="100%"]'
-              . '[et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_counters][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Gallery slider ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Gallery</p>'
-              . '<h2>Take a Tour of Our Hotel</h2>[/et_pb_text]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_gallery_slider][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]'
-
-              // --- Contact form ---
-              . '[et_pb_section fb_built="1" _builder_version="4.20.0" background_color="#f7f7f7" custom_padding="70px||70px||true|false"]'
-              . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-              . '[et_pb_text _builder_version="4.20.0" header_2_font="Poppins|600|||||||" header_2_text_color="#14141e" header_2_font_size="32px" header_2_text_align="center" custom_margin="||30px||false|false"]'
-              . '<p style="color:#D81418;letter-spacing:2px;font-size:13px;text-transform:uppercase;margin:0;font-weight:600;text-align:center;">Contact Us</p>'
-              . '<h2>Send a Message</h2>[/et_pb_text]'
-              . '[/et_pb_column][/et_pb_row]'
-              . '[et_pb_row column_structure="2_3,1_3" _builder_version="4.20.0"]'
-              . '[et_pb_column type="2_3" _builder_version="4.20.0"]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_inquiry_form variant="inquiry"][/et_pb_code]'
-              . '[/et_pb_column]'
-              . '[et_pb_column type="1_3" _builder_version="4.20.0"]'
-              . '[et_pb_code _builder_version="4.20.0"][hc_contact_info style="light"][/et_pb_code]'
-              . '[/et_pb_column][/et_pb_row][/et_pb_section]';
-
         if ( $existing ) {
-            // Update existing page content in place
-            $post_id = wp_update_post( array(
+            wp_update_post( array(
                 'ID'           => $existing->ID,
                 'post_title'   => $title,
                 'post_content' => $body,
             ) );
+            $post_id = $existing->ID;
         } else {
             $post_id = wp_insert_post( array(
                 'post_type'    => 'page',
@@ -358,23 +370,21 @@ function hc_pages_seed_seo_pages() {
                 'post_name'    => $slug,
                 'post_content' => $body,
             ) );
+            if ( is_wp_error( $post_id ) || ! $post_id ) continue;
         }
-
-        if ( is_wp_error( $post_id ) || ! $post_id ) continue;
 
         update_post_meta( $post_id, '_et_pb_use_builder', 'on' );
         update_post_meta( $post_id, '_et_pb_page_layout', 'et_no_sidebar' );
 
-        // Stash original SEO meta for Yoast / RankMath / manual use
         if ( ! empty( $entry['meta_title'] ) ) {
-            update_post_meta( $post_id, '_yoast_wpseo_title',         $entry['meta_title'] );
-            update_post_meta( $post_id, 'rank_math_title',             $entry['meta_title'] );
-            update_post_meta( $post_id, '_hc_original_meta_title',     $entry['meta_title'] );
+            update_post_meta( $post_id, '_yoast_wpseo_title',     $entry['meta_title'] );
+            update_post_meta( $post_id, 'rank_math_title',         $entry['meta_title'] );
+            update_post_meta( $post_id, '_hc_original_meta_title', $entry['meta_title'] );
         }
         if ( ! empty( $entry['meta_description'] ) ) {
-            update_post_meta( $post_id, '_yoast_wpseo_metadesc',       $entry['meta_description'] );
-            update_post_meta( $post_id, 'rank_math_description',       $entry['meta_description'] );
-            update_post_meta( $post_id, '_hc_original_meta_desc',      $entry['meta_description'] );
+            update_post_meta( $post_id, '_yoast_wpseo_metadesc',   $entry['meta_description'] );
+            update_post_meta( $post_id, 'rank_math_description',   $entry['meta_description'] );
+            update_post_meta( $post_id, '_hc_original_meta_desc',  $entry['meta_description'] );
         }
     }
 
@@ -382,7 +392,7 @@ function hc_pages_seed_seo_pages() {
 }
 
 /**
- * Static-text pages (FAQ + policies + blogs index) — content extracted from public_html/
+ * Static text pages — FAQ, policies, news-blogs index.
  */
 function hc_pages_static_definitions() {
 
@@ -431,7 +441,7 @@ function hc_pages_static_definitions() {
         . '<p><strong>For peak-season or big-event days, cancellation policies may not be applicable and the full amount for the booking days will be charged.</strong></p>';
 
     $privacy_html = '<h2>Privacy Policy</h2>'
-        . '<p>Hotel Cosmopolitan respects your privacy and is committed to protecting the personal data you share with us. This privacy policy explains how we collect, use, and safeguard the information you provide when using our website or services.</p>'
+        . '<p>Hotel Cosmopolitan respects your privacy and is committed to protecting the personal data you share with us.</p>'
         . '<h4>Information We Collect</h4>'
         . '<ul><li>Contact details (name, email, phone) provided through booking forms and inquiries.</li>'
         . '<li>Reservation details (dates, room preferences, special requests).</li>'
@@ -441,9 +451,9 @@ function hc_pages_static_definitions() {
         . '<li>To send confirmations, updates, and (with consent) promotional offers.</li>'
         . '<li>To improve our website and services.</li></ul>'
         . '<h4>Sharing</h4>'
-        . '<p>We do not sell your personal data. We may share it with trusted service providers (payment processors, booking platforms) strictly as needed to provide services to you. We comply with applicable Indian data-protection laws.</p>'
+        . '<p>We do not sell your personal data. We may share it with trusted service providers (payment processors, booking platforms) strictly as needed to provide services to you.</p>'
         . '<h4>Contact</h4>'
-        . '<p>Questions about this policy? Email <a href="mailto:reserve@hotelcosmopolitan.in">reserve@hotelcosmopolitan.in</a>.</p>';
+        . '<p>Questions? Email <a href="mailto:reserve@hotelcosmopolitan.in">reserve@hotelcosmopolitan.in</a>.</p>';
 
     $terms_html = '<h2>Terms &amp; Conditions</h2>'
         . '<p>By using the Hotel Cosmopolitan website and making a reservation, you agree to the following terms.</p>'
@@ -459,9 +469,7 @@ function hc_pages_static_definitions() {
         . '<h4>Conduct</h4>'
         . '<p>The hotel reserves the right to refuse service to any guest whose behaviour is disruptive, dangerous or in breach of house rules.</p>'
         . '<h4>Liability</h4>'
-        . '<p>Hotel Cosmopolitan is not responsible for loss or damage to personal belongings beyond what is required by applicable Indian law. Use of in-room safes is strongly recommended.</p>';
-
-    $news_blogs_html = '[hc_blogs_grid limit="9" columns="3"]';
+        . '<p>Hotel Cosmopolitan is not responsible for loss or damage to personal belongings beyond what is required by applicable Indian law.</p>';
 
     return array(
         array( 'slug' => 'faq',                  'title' => "FAQ's",               'content' => $faq_html ),
@@ -469,6 +477,6 @@ function hc_pages_static_definitions() {
         array( 'slug' => 'cancellation-policy',  'title' => 'Cancellation Policy', 'content' => $cancellation_html ),
         array( 'slug' => 'privacy-policy',       'title' => 'Privacy Policy',      'content' => $privacy_html ),
         array( 'slug' => 'terms-condition',      'title' => 'Terms & Conditions',  'content' => $terms_html ),
-        array( 'slug' => 'news-blogs',           'title' => 'News & Blogs',        'content' => $news_blogs_html ),
+        array( 'slug' => 'news-blogs',           'title' => 'News & Blogs',        'content' => '[hc_blogs_grid limit="9" columns="3"]' ),
     );
 }
