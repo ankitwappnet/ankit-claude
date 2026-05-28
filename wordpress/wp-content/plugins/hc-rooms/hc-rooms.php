@@ -37,6 +37,7 @@ register_activation_hook( __FILE__, function () {
     delete_option( 'hc_pages_seeded' );
     delete_option( 'hc_pages_seeded_v2' );
     delete_option( 'hc_pages_seeded_v3' );
+    delete_option( 'hc_pages_seeded_v4' );
     delete_option( 'hc_seo_pages_seeded_v3' );
     flush_rewrite_rules();
 } );

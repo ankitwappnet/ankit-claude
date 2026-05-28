@@ -19,7 +19,7 @@ add_action( 'admin_init', 'hc_pages_seed', 40 );
 
 function hc_pages_seed() {
 
-    if ( get_option( 'hc_pages_seeded_v4' ) ) return;
+    if ( get_option( 'hc_pages_seeded_v5' ) ) return;
 
     $created_ids = array();
 
@@ -98,9 +98,11 @@ function hc_pages_seed() {
 
     // ----- 7. Flush rewrites + mark done -----
     flush_rewrite_rules();
-    update_option( 'hc_pages_seeded_v4', 1 );
+    update_option( 'hc_pages_seeded_v5', 1 );
     delete_option( 'hc_pages_seeded' );
     delete_option( 'hc_pages_seeded_v2' );
+    delete_option( 'hc_pages_seeded_v3' );
+    delete_option( 'hc_pages_seeded_v4' );
 }
 
 /**
@@ -193,11 +195,10 @@ function hc_build_about_page() {
 }
 
 function hc_build_rooms_archive_page() {
+    // Use the same per-room native Divi blurb stack as the home page so
+    // every room card on /rooms/ is also clickable / editable in Divi Builder.
     return hc_divi_page_title( 'Rooms' )
-         . '[et_pb_section fb_built="1" _builder_version="4.20.0" custom_padding="60px||100px||true|false"]'
-            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
-            . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
-            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+         . hc_divi_rooms_section( '', 'Choose Your Room' );
 }
 
 function hc_build_restaurant_page() {

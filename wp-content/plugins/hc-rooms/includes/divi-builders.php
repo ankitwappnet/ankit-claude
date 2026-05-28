@@ -188,17 +188,154 @@ function hc_divi_facilities( $eyebrow = 'Facilities', $title = 'Why Choose Us' )
 }
 
 /**
- * Rooms section — uses [hc_rooms_grid] inside a code module because rooms are
- * dynamic. The wrapping heading + button are native Divi modules so the
- * eyebrow/title/CTA can be edited visually.
+ * Rooms section — queries the room CPT at seed time and emits ONE
+ * stack of native Divi modules per room (image + text + booking buttons)
+ * so the client can click each room card and edit it individually in
+ * Divi Builder.
+ *
+ * Layout: 2 rooms per row. Each cell is an et_pb_image + et_pb_text
+ * (title + meta + amenities) + et_pb_button(s) + a Know More text link.
+ *
+ * NOTE: this generates STATIC Divi content. If the client adds a new
+ * room type via Rooms admin, they need to also add a corresponding
+ * card to the home/landing pages in Divi Builder (clone an existing
+ * room column and re-point it).
  */
-function hc_divi_rooms_section( $eyebrow = 'Explore', $title = 'Our Rooms' ) {
+function hc_divi_rooms_section( $eyebrow = 'Explore', $title = 'Our Rooms', $limit = -1 ) {
+
+    $q = new WP_Query( array(
+        'post_type'      => 'room',
+        'posts_per_page' => intval( $limit ),
+        'orderby'        => 'menu_order',
+        'order'          => 'ASC',
+    ) );
+
+    if ( ! $q->have_posts() ) {
+        // No rooms exist yet — fall back to the dynamic shortcode so
+        // the page isn't blank if the seeder runs before rooms.
+        return hc_divi_section_open()
+            . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
+            . hc_divi_heading( $eyebrow, $title )
+            . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
+            . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+    }
+
+    $rooms = $q->posts;
+    wp_reset_postdata();
+
+    // Build a card markup per room
+    $room_cards = array();
+    foreach ( $rooms as $room ) {
+        $room_cards[] = hc_divi_single_room_card( $room->ID );
+    }
+
+    // Chunk into rows of 2
+    $rows_markup = '';
+    foreach ( array_chunk( $room_cards, 2 ) as $pair ) {
+        $rows_markup .= '[et_pb_row column_structure="1_2,1_2" _builder_version="4.20.0" custom_padding="0||30px||false|false"]';
+        $rows_markup .= '[et_pb_column type="1_2" _builder_version="4.20.0"]' . $pair[0] . '[/et_pb_column]';
+        if ( isset( $pair[1] ) ) {
+            $rows_markup .= '[et_pb_column type="1_2" _builder_version="4.20.0"]' . $pair[1] . '[/et_pb_column]';
+        } else {
+            $rows_markup .= '[et_pb_column type="1_2" _builder_version="4.20.0"][/et_pb_column]';
+        }
+        $rows_markup .= '[/et_pb_row]';
+    }
+
     return hc_divi_section_open()
         . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
         . hc_divi_heading( $eyebrow, $title )
-        . '[et_pb_code _builder_version="4.20.0"][hc_rooms_grid columns="2"][/et_pb_code]'
+        . '[/et_pb_column][/et_pb_row]'
+        . $rows_markup
+        . '[et_pb_row _builder_version="4.20.0"][et_pb_column type="4_4" _builder_version="4.20.0"]'
         . '[et_pb_button button_text="View All Rooms" button_url="' . esc_url( home_url( '/rooms/' ) ) . '" button_alignment="center" _builder_version="4.20.0" custom_button="on" button_text_size="14px" button_text_color="#ffffff" button_bg_color="#D81418" button_border_width="2px" button_border_color="#D81418" button_letter_spacing="2px" button_font="Poppins|600|on||||||" custom_margin="30px||||false|false"][/et_pb_button]'
         . '[/et_pb_column][/et_pb_row][/et_pb_section]';
+}
+
+/**
+ * Render a single room as a stack of editable native Divi modules:
+ *   - et_pb_image      (featured image, linked to the room page)
+ *   - et_pb_text       (title + bed/size meta + amenities as a 2-col HTML list)
+ *   - et_pb_button × N (one per booking option, e.g. Room Only / Room + Breakfast)
+ *   - et_pb_text       ("Know More" link)
+ *
+ * Returns the concatenated shortcode string (no outer column wrapper).
+ */
+function hc_divi_single_room_card( $room_id ) {
+
+    $room_url = get_permalink( $room_id );
+    $title    = get_the_title( $room_id );
+    $thumb_id = get_post_thumbnail_id( $room_id );
+    $img_url  = $thumb_id ? wp_get_attachment_image_url( $thumb_id, 'large' ) : '';
+
+    $bed       = hc_get( 'bed_type',        $room_id );
+    $size      = hc_get( 'room_size',       $room_id );
+    $amenities = hc_get( 'amenities',       $room_id );
+    $options   = hc_get( 'booking_options', $room_id );
+
+    // --- Image module ---
+    $image_module = $img_url
+        ? '[et_pb_image src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $title ) . '" url="' . esc_url( $room_url ) . '" _builder_version="4.20.0" custom_margin="0||10px||false|false"][/et_pb_image]'
+        : '';
+
+    // --- Title + meta + amenities text module ---
+    $meta_line = '';
+    if ( $bed || $size ) {
+        $meta_line = '<p style="color:#888;font-size:14px;margin:0 0 14px;">'
+                   . esc_html( trim( $bed . ( $bed && $size ? ' · ' : '' ) . $size ) )
+                   . '</p>';
+    }
+
+    $amenities_html = '';
+    if ( is_array( $amenities ) && $amenities ) {
+        $shown = array_slice( $amenities, 0, 8 );
+        $amenities_html = '<ul style="list-style:none;padding:0;margin:0 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:14px;">';
+        foreach ( $shown as $a ) {
+            $amenities_html .= '<li style="color:#666;padding-left:22px;position:relative;">'
+                            . '<span style="color:#D81418;font-weight:700;position:absolute;left:0;">&#10003;</span>'
+                            . esc_html( $a['label'] ?? '' )
+                            . '</li>';
+        }
+        $amenities_html .= '</ul>';
+    }
+
+    $text_module = '[et_pb_text _builder_version="4.20.0" text_font="Poppins||||||||" text_text_color="#555555" header_3_font="Poppins|600|||||||" header_3_text_color="#D81418" header_3_font_size="22px"]'
+                 . '<h3>' . esc_html( $title ) . '</h3>'
+                 . $meta_line
+                 . $amenities_html
+                 . '[/et_pb_text]';
+
+    // --- Booking option buttons ---
+    $buttons = '';
+    if ( is_array( $options ) && $options ) {
+        foreach ( $options as $opt ) {
+            $label = $opt['label'] ?? 'Book Now';
+            $url   = $opt['url']   ?? '#';
+            $buttons .= '[et_pb_button'
+                . ' button_text="' . esc_attr( $label . ' — Book Now' ) . '"'
+                . ' button_url="' . esc_url( $url ) . '"'
+                . ' url_new_window="on"'
+                . ' button_alignment="left"'
+                . ' _builder_version="4.20.0"'
+                . ' custom_button="on"'
+                . ' button_text_size="13px"'
+                . ' button_text_color="#ffffff"'
+                . ' button_bg_color="#D81418"'
+                . ' button_border_width="2px"'
+                . ' button_border_color="#D81418"'
+                . ' button_letter_spacing="1px"'
+                . ' button_font="Poppins|600|on||||||"'
+                . ' custom_margin="0||10px||false|false"'
+                . '][/et_pb_button]';
+        }
+    }
+
+    // --- "Know More" text link ---
+    $know_more = '[et_pb_text _builder_version="4.20.0"]'
+               . '<p style="margin:14px 0 0;"><a href="' . esc_url( $room_url ) . '" style="color:#D81418;font-weight:600;text-decoration:none;">Know More &rarr;</a></p>'
+               . '[/et_pb_text]';
+
+    return $image_module . $text_module . $buttons . $know_more;
 }
 
 /**
